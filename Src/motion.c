@@ -249,11 +249,11 @@ motionInit(motiont *motionBlock)
 	 SBUS_init(&motionBlock->sbus);
 
 	 servoFB_init(&(motionBlock->servoA));
-	 //servoFB_init(&(motionBlock->servoB));
+	 servoFB_init(&(motionBlock->servoB));
 	 servoNE_init(&(motionBlock->servoC));
 	 servoNE_init(&(motionBlock->servoD));
 
-//	HAL_TIM_Encoder_Start_IT(motionBlock->encTim2, TIM_CHANNEL_ALL);
+	//HAL_TIM_Encoder_Start_IT(motionBlock->encTim2, TIM_CHANNEL_ALL);
 	motionTimer_1.set_value=10;
 	motionTimer_1.Callback=NULL;
 	initTimer(&motionTimer_1);
