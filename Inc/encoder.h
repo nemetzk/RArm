@@ -13,7 +13,7 @@ static uint32_t Period = 65535;
 #define EA_MEASURE_PLS_POS	10
 #define EA_MEASURE_PLS_NEG	20
 
-
+int32_t debug_absval;
 
 typedef struct Encoderh{
 	uint8_t number;
@@ -27,7 +27,7 @@ typedef struct Encoderh{
 	int8_t reverseEncoderValue;
 	uint8_t pulseInitContinue;
 	uint8_t pulseInitPassed;
-	int16_t speed;
+	int32_t speed;
 	TIM_HandleTypeDef *enctim;
 	myTimerType encoderTim;
 	myTimerType encoderMeasTim;

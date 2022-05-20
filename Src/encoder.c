@@ -53,15 +53,19 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 
 	case EA_WF_FIRST_PULSE: //VÁRJA INITKOR AZ ELSŐ IMPULZUST
 		hencoder->readVal =  __HAL_TIM_GET_COUNTER(hencoder->enctim);
-		if ((abs(hencoder->readVal - hencoder->preReadval)>1))
-		{
-			hencoder->speed = (int16_t)((hencoder->val - hencoder->pre_val)/(hencoder->encoderMeasTim.set_value)*1000);
-			hencoder->preReadval = hencoder->readVal;
+		debug_absval = abs(hencoder->readVal - hencoder->preReadval);
 
+		if ( debug_absval > 1 )
+		{
+			hencoder->speed =(hencoder->readVal - hencoder->preReadval);
+			hencoder->preReadval = hencoder->readVal;
+			ServoInitProcess(hencoder->ownerPtr);
+
+		}
 
 		if (hencoder->pulseInitContinue)
 			hencoder->state = EA_IDLE;
-		}
+
 	break;
 
 	case EA_IDLE: //NYUGALMI ÁLLAPOTBAN IDŐ UTÁN NINCS ÚJABB IMPULZUS
@@ -69,7 +73,7 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 		if ((abs(hencoder->readVal - hencoder->preReadval)>1))
 				{
 					calculateReversedValue(hencoder);
-					hencoder->speed = (int16_t)((hencoder->val - hencoder->pre_val)/(hencoder->encoderMeasTim.set_value)*10);
+					hencoder->speed = ((hencoder->val - hencoder->pre_val));
 					hencoder->pre_val = hencoder->val;
 					if (hencoder->speed > 0)
 						hencoder->state = EA_MEASURE_PLS_POS;
@@ -83,7 +87,7 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 		if ((abs(hencoder->readVal - hencoder->preReadval)>1))
 				{
 					calculateReversedValue(hencoder);
-					hencoder->speed = (int16_t)((hencoder->val - hencoder->pre_val)/(hencoder->encoderMeasTim.set_value)*1000);
+					hencoder->speed = ((hencoder->val - hencoder->pre_val));
 					hencoder->pre_val = hencoder->val;
 					if (hencoder->speed > 0)
 						hencoder->state = EA_MEASURE_PLS_POS;
@@ -102,7 +106,7 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 		if ((abs(hencoder->readVal - hencoder->preReadval)>1))
 				{
 					calculateReversedValue(hencoder);
-					hencoder->speed = (int16_t)((hencoder->val - hencoder->pre_val)/(hencoder->encoderMeasTim.set_value)*1000);
+					hencoder->speed = (int16_t)((hencoder->val - hencoder->pre_val));
 					hencoder->pre_val = hencoder->val;
 					if (hencoder->speed > 0) hencoder->state = EA_MEASURE_PLS_POS;
 					if (hencoder->speed < 0) hencoder->state = EA_MEASURE_PLS_NEG;

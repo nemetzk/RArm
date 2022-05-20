@@ -71,7 +71,7 @@ servoFB_init(struct servoFBth *hservoFB)
 	// csak az első szervó initnél hozunk létre összesen 1 timert
 	if (noServos == 1)
 	{
-		hservoFB->servoCycleTim.set_value = 100;
+		hservoFB->servoCycleTim.set_value = 50;
 		hservoFB->servoCycleTim.Callback = &servoCycle_Callback;
 		hservoFB->servoCycleTim.ownerPtr = hservoFB;
 		initTimer(&hservoFB->servoCycleTim);
@@ -145,10 +145,10 @@ void servoGoForPulse(struct servoFBth *servoFB,int32_t setPulse)
 	servoFB->encoder.ownerPtr = servoFB;
 	servoFB->encoder.Callback = servoGoForPulseCycl;
 
-	servoFB->encoder.val =  __HAL_TIM_GET_COUNTER(servoFB->encoder.enctim);
+	//servoFB->encoder.val =  __HAL_TIM_GET_COUNTER(servoFB->encoder.enctim);
 	servoFB->pulse_start = servoFB->encoder.val;
 	servoFB->pulse_dest = servoFB->encoder.val+setPulse;
-	//setTimer(&(servoFB->encoder.encoderTim));
+	setTimer(&(servoFB->encoder.encoderTim));
 	if (setPulse > 0)
 	{
 		servoFB->CWcmd=0XFF;
@@ -170,90 +170,6 @@ void servoGoForPulse(struct servoFBth *servoFB,int32_t setPulse)
 #define spFINISHED  1
 #define spError		-1
 
-int8_t servoGoForPulse_bad(struct servoFBth *servoFB,int32_t setPulse)
-{
-	int16_t mystate = servoFB->subProcessState;
-
-	switch (mystate)
-	{
-	case spINIT:
-		mystate = spRELEASE;
-	break;
-	case spRELEASE:
-		mystate = spHOME;
-	break;
-	case spHOME:
-		servoFB->encoder.ownerPtr = servoFB;
-
-		servoFB->encoder.val =  __HAL_TIM_GET_COUNTER(servoFB->encoder.enctim);
-			servoFB->pulse_start = servoFB->encoder.val;
-			servoFB->pulse_dest = servoFB->encoder.val+setPulse;
-			//setTimer(&(servoFB->encoder.encoderTim));
-			if (setPulse > 0)
-			{
-				servoFB->CWcmd=0XFF;
-				servoFB->CCWcmd=0X00;
-			}
-			else if (setPulse < 0)
-			{
-				servoFB->CCWcmd=0XFF;
-				servoFB->CWcmd=0X00;
-			}
-		mystate = spPROCESS;
-	break;
-	case spPROCESS:
-		if (servoFB->processTime.cur_value> 8000)
-		{
-			mystate =spError;
-		}
-
-		if((servoFB->pulse_start) < (servoFB->pulse_dest))
-		{ //CW
-			if (((servoFB->pulse_dest)-(servoFB->encoder.val))<=4)
-			{
-				servoFB->CWcmd=0;
-				servoFB->encoder.ownerPtr = NULL;
-				servoFB->encoder.Callback = NULL;
-				mystate = spFINISHED;
-			}
-		}
-		else
-		{//CCW
-			if (((servoFB->encoder.val)-(servoFB->pulse_dest))<=4)
-			{
-				servoFB->CCWcmd=0;
-				servoFB->encoder.ownerPtr = NULL;
-				servoFB->encoder.Callback = NULL;
-				mystate = spFINISHED;
-			}
-
-		if (servoFB->CCWcmd==0 && servoFB->CCWcmd==0)
-		{
-			mystate = spRELEASE;
-		}
-
-		}
-	break;
-	case spFINISHED:
-		mystate = spRELEASE;
-	break;
-	case spError:
-
-	break;
-	}
-
-	servoFB->subProcessState = mystate;
-
-/*
-	servoFB->encoder.ownerPtr = servoFB;
-	servoFB->encoder.Callback = servoGoForPulseCycl;
-*/
-
-
-
-	return servoFB->subProcessState;
-}
-
 //FELADAT: STÁTUSZ ÜZENETEKET MEGOL
 
 
@@ -274,7 +190,7 @@ void ServoInitProcess(struct servoFBth *servoFB)
 	  	  }
 	  break;
 	  case S_INIT_SEQUENCE_GO_UP:
-		  servoFB->reverse_stop_op = 1;
+		  //servoFB->reverse_stop_op = 1;
 		  servoGoForPulse(servoFB,20);
 		  if (servoFB->servoStatus == SCW)
 		  //if (servoFB->encoder.speed > 50)
@@ -294,6 +210,8 @@ void ServoInitProcess(struct servoFBth *servoFB)
 		  {
 			  servoFB->encoder.reverseEncoderValue = 0xFF;
 			  servoFB->encoder.pulseInitContinue = 0xFF;
+			  servoFB->encoder.pulseInitPassed = 1;
+			  servoFB->encoder.pulseInitContinue = 0xFF;
 		  }
 
 		  if (servoFB->servoStatus == SRDY)
@@ -301,11 +219,9 @@ void ServoInitProcess(struct servoFBth *servoFB)
 		    servoGoForPulse(servoFB,-20);
 		  }
 		  if (servoFB->servoStatus == SCCW)
-		  		  {
+		  {
 			  servoFB->sInitState=S_INIT_SEQUENCE_WF_GO_DN;
-		  		  }
-
-
+		  }
 	  break;
 
 	  case S_INIT_SEQUENCE_WF_GO_DN:
@@ -318,6 +234,8 @@ void ServoInitProcess(struct servoFBth *servoFB)
 		  else if (servoFB->encoder.speed >= 5)
 		  {
 			  servoFB->encoder.reverseEncoderValue = 0xFF;
+			  servoFB->encoder.pulseInitContinue = 0xFF;
+			  servoFB->encoder.pulseInitPassed = 1;
 			  servoFB->encoder.pulseInitContinue = 0xFF;
 		  }
 
@@ -355,23 +273,16 @@ void ServoStatusCycl(struct servoFBth *servoFB)
 	{
 	case SHALT:
 
-			if ((!servoFB->CWcmd) && (!servoFB->CCWcmd)&& !servoFB->reverse_stop_op)
+			if ((!servoFB->CWcmd) && (!servoFB->CCWcmd))
 			{
 
 				servoFB->servoStatus=SRDY;
 			}
-			if (((!servoFB->CWcmd) && (!servoFB->CCWcmd)&& servoFB->reverse_stop_op && (servoFB->encoder.state>=0)))
+
+			if (((!servoFB->CWcmd) && (!servoFB->CCWcmd)&& (servoFB->encoder.state>=0)))
 			{
 				servoFB->servoStatus=SRDY;
 			}
-
-			if (servoFB->reverse_stop_op){
-				if (servoFB->encoder.state<0)
-				{
-				//servoFB->servoStatus=SERR;
-				}
-			}
-
 	break;
 
 	case SRDY:
@@ -414,7 +325,7 @@ void ServoStatusCycl(struct servoFBth *servoFB)
 			}
 		}
 
-		if ((!servoFB->CWcmd) || (servoFB->reverse_stop_op && (servoFB->encoder.state == -1)))
+		if (!servoFB->CWcmd)
 			{
 				set_MOTOR_STOP(&(servoFB->pwmch));
 				servoFB->servoStatus=SHALT;
@@ -442,11 +353,11 @@ void ServoStatusCycl(struct servoFBth *servoFB)
 				}
 		}
 
-			if ((!servoFB->CCWcmd) || (servoFB->reverse_stop_op && (servoFB->encoder.state == -1)))
-				{
+			if (!servoFB->CCWcmd)
+			{
 					set_MOTOR_STOP(&(servoFB->pwmch));
 					servoFB->servoStatus=SHALT;
-				}
+			}
 
 	break;
 	case SERR:

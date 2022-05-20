@@ -23,6 +23,7 @@ myTimerType motionTimer_1;
 #define MC_WF_MOTION_A		4
 #define MC_WF_MOTION_B		5
 #define MC_WF_FORWARD		6
+#define MC_WF_TESZT 		7
 
 void motion_cycle(struct motionth *motionb)
 {
@@ -70,10 +71,14 @@ void motion_cycle(struct motionth *motionb)
 
 	  }
 
-	  else if (SH_B && SD_C)//SZERVO TESZT
-	  	  {
-	  		  servoGoForTime_NE(&motionb->servoD, 4000, -1);
-	  	  }
+	  else if (SH_B && SD_C && SC_A)//SZERVO TESZT
+	  {
+		  	  servoGoForPulse(&motionb->servoB, 64);
+	  }
+	  else if (SH_B && SD_C && SC_B)//SZERVO TESZT
+	  {
+		  	  servoGoForPulse(&motionb->servoB, -64);
+	  }
 
 	  else if ((motionb->servoD.servoStatus!=SNERDY) && SD_B)
 			motionb->taut_state = MC_WF_BACKWARD;
@@ -130,7 +135,11 @@ void motion_cycle(struct motionth *motionb)
 	 			  motionb->taut_state = MC_WF_RELEASE;
   break;
 
-  }
+  case MC_WF_TESZT:
+	  if ((motionb->servoB.servoStatus == SNERDY))
+	  	 			  motionb->taut_state = MC_WF_RELEASE;
+  break;
+  } //switch
 }
 
 #define TAUT_WF_SERVO_RDY			0
