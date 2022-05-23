@@ -41,6 +41,7 @@ typedef struct servoFBth
 	int8_t subProcessState;
 	int32_t pos;
 	myTimerType goForTimer;
+	myTimerType goForPulseCycleTimer;
 	myTimerType servoCycleTim; //obsolete
 	myTimerType processTime;
 
@@ -65,5 +66,6 @@ typedef struct servoFBth
 
 //,,uint32_t *pwmCh
 void servoStop(struct servoFBth *servoFB);
+void servoGoForPulseCycl(struct servoFBth *servoFB);
 
 #endif /* INC_SERVOFB_H_ */

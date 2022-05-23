@@ -62,16 +62,22 @@ servoFB_init(struct servoFBth *hservoFB)
 	hservoFB->encoder.ownerPtr = NULL;
 	hservoFB->encoder.Callback = NULL;
 	encoder_init(&(hservoFB->encoder),(hservoFB->encTim));
-	hservoFB->processTime.set_value = 10000;
+	hservoFB->processTime.set_value = 7000;
 	hservoFB->processTime.ownerPtr=hservoFB;
 	hservoFB->processTime.Callback=&servoStop;
 	initTimer(&hservoFB->processTime);
 
+	//****** goForPulseCycleTimer init **********
+	hservoFB->goForPulseCycleTimer.Callback = servoGoForPulseCycl;
+	hservoFB->goForPulseCycleTimer.set_value = 25;
+	hservoFB->goForPulseCycleTimer.ownerPtr=hservoFB;
+	initTimer(&(hservoFB->goForPulseCycleTimer));
+	//********************************************
 	// szervókat egyszerre kezelő ciklusfüggvényt meghívó timer készítése
 	// csak az első szervó initnél hozunk létre összesen 1 timert
 	if (noServos == 1)
 	{
-		hservoFB->servoCycleTim.set_value = 50;
+		hservoFB->servoCycleTim.set_value = 25;
 		hservoFB->servoCycleTim.Callback = &servoCycle_Callback;
 		hservoFB->servoCycleTim.ownerPtr = hservoFB;
 		initTimer(&hservoFB->servoCycleTim);
@@ -120,20 +126,28 @@ void servoGoForPulseCycl(struct servoFBth *servoFB)
 {
 	if((servoFB->pulse_start) < (servoFB->pulse_dest))
 	{ //CW
-		if (((servoFB->pulse_dest)-(servoFB->encoder.val))<=4)
+		if ( servoFB->encoder.val +260 >=servoFB->pulse_dest )
 		{
 			servoFB->CWcmd=0;
 			servoFB->encoder.ownerPtr = NULL;
 			servoFB->encoder.Callback = NULL;
 		}
+		else
+		{
+			setTimer(&(servoFB->goForPulseCycleTimer));
+		}
 	}
 	else
 	{//CCW
-		if (((servoFB->encoder.val)-(servoFB->pulse_dest))<=4)
+		if ( servoFB->encoder.val-260 <=  servoFB->pulse_dest)
 		{
 			servoFB->CCWcmd=0;
 			servoFB->encoder.ownerPtr = NULL;
 			servoFB->encoder.Callback = NULL;
+		}
+		else
+		{
+			setTimer(&(servoFB->goForPulseCycleTimer));
 		}
 	}
 }
@@ -142,13 +156,18 @@ void servoGoForPulseCycl(struct servoFBth *servoFB)
 
 void servoGoForPulse(struct servoFBth *servoFB,int32_t setPulse)
 {
+	/*
 	servoFB->encoder.ownerPtr = servoFB;
 	servoFB->encoder.Callback = servoGoForPulseCycl;
-
+*/
 	//servoFB->encoder.val =  __HAL_TIM_GET_COUNTER(servoFB->encoder.enctim);
 	servoFB->pulse_start = servoFB->encoder.val;
 	servoFB->pulse_dest = servoFB->encoder.val+setPulse;
 	setTimer(&(servoFB->encoder.encoderTim));
+
+	setTimer(&(servoFB->goForPulseCycleTimer));
+
+
 	if (setPulse > 0)
 	{
 		servoFB->CWcmd=0XFF;

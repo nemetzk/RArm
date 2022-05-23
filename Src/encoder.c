@@ -79,6 +79,7 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 						hencoder->state = EA_MEASURE_PLS_POS;
 					if (hencoder->speed < 0)
 						hencoder->state = EA_MEASURE_PLS_NEG;
+					setTimer(&(hencoder->encoderTim));
 				}
 	break;
 
@@ -93,6 +94,7 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 						hencoder->state = EA_MEASURE_PLS_POS;
 					if (hencoder->speed < 0)
 						hencoder->state = EA_MEASURE_PLS_NEG;
+					setTimer(&(hencoder->encoderTim));
 				}
 		else if ((hencoder->val == hencoder->pre_val))
 		{
@@ -110,6 +112,7 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 					hencoder->pre_val = hencoder->val;
 					if (hencoder->speed > 0) hencoder->state = EA_MEASURE_PLS_POS;
 					if (hencoder->speed < 0) hencoder->state = EA_MEASURE_PLS_NEG;
+					setTimer(&(hencoder->encoderTim));
 				}
 		else if ((hencoder->val == hencoder->pre_val))
 		{
@@ -137,7 +140,7 @@ void encoder_init(Encoder *hencoder, TIM_HandleTypeDef *htim)
 	initTimer(&hencoder->encoderTim);
 
 	hencoder->state = EA_INIT;
-	hencoder->encoderMeasTim.set_value = 100;
+	hencoder->encoderMeasTim.set_value = 10;
 	hencoder->encoderMeasTim.Callback = encoderAutomata_cycl; // korábban spdMeas;
 	hencoder->encoderMeasTim.ownerPtr = hencoder;
 

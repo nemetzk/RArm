@@ -25,12 +25,21 @@ myTimerType motionTimer_1;
 #define MC_WF_FORWARD		6
 #define MC_WF_TESZT 		7
 
+#define TAUT_WF_SERVO_RDY			0
+#define TAUT_INIT_SEQUENCE_GO_UP	1
+#define TAUT_INIT_SEQUENCE_WF_GO_UP 2
+#define TAUT_INIT_SEQUENCE_WF_GO_DN 3
+#define TAUT_WF_RELEASE 			4
+#define TAUT_WF_CHANNEL				5
+#define TAUT_OP_CHANNEL				6
+#define TAUT_SC_OP_CHANNEL 			7
+#define	TAUT_SG_OP_CHANNEL			8
+
 void motion_cycle(struct motionth *motionb)
 {
   switch (motionb->taut_state)
   {
   case MC_WF_SERVO_RDY:
-
   	  if ((motionb->servoA.sInitState == S_INIT_DONE) && (motionb->servoA.servoStatus == SRDY))
   		if ((motionb->servoB.sInitState == S_INIT_DONE) && (motionb->servoB.servoStatus == SRDY))
   	  {
@@ -44,6 +53,7 @@ void motion_cycle(struct motionth *motionb)
 		  motionb->taut_state = MC_WF_START_SIGNAL;
 	  }
   break;
+
   case MC_WF_START_SIGNAL:
 	  rcCopy(&(motionb->servoC));
 
@@ -51,35 +61,29 @@ void motion_cycle(struct motionth *motionb)
 	  {
   		servoGoForPulse(&motionb->servoA,90);
 	  }
-
-
-
 	  else if (SH_B && SC_C && SD_A) //NINCS HÁTRAMENETEL CSAK ÁTALAKULÁS
 	  {
   		servoGoForPulse(&motionb->servoA,-90);
 	  }
-
 	  else if (SH_B && SD_B)//HÁTRAMENETELLEL
 	  {
 		  servoGoForTime_NE(&motionb->servoD, 4000, -1);
 	  }
-
-
 	  else if ((motionb->servoA.servoStatus!=SRDY) && SD_A)
 	  {
 			motionb->taut_state = MC_WF_MOTION_A;
 
 	  }
-
 	  else if (SH_B && SD_C && SC_A)//SZERVO TESZT
 	  {
-		  	  servoGoForPulse(&motionb->servoB, 256);
+		  	  servoGoForPulse(&motionb->servoB, 1020);
+		  	  motionb->taut_state = MC_WF_TESZT;
 	  }
 	  else if (SH_B && SD_C && SC_B)//SZERVO TESZT
 	  {
-		  	  servoGoForPulse(&motionb->servoB, -256);
+		  	  servoGoForPulse(&motionb->servoB, -1020);
+		  	  motionb->taut_state = MC_WF_TESZT;
 	  }
-
 	  else if ((motionb->servoD.servoStatus!=SNERDY) && SD_B)
 			motionb->taut_state = MC_WF_BACKWARD;
   break;
@@ -116,6 +120,7 @@ void motion_cycle(struct motionth *motionb)
 	  if (motionb->servoB.servoStatus!=SRDY)
 				motionb->taut_state = MC_WF_MOTION_B;
   break;
+
   case MC_WF_MOTION_B:
 	  if ((motionb->servoB.servoStatus==SRDY) || ((motionb->servoB.servoStatus==SHALT)))
 	  {
@@ -130,6 +135,7 @@ void motion_cycle(struct motionth *motionb)
 	  }
 
   break;
+
   case MC_WF_FORWARD:
 	  if ((motionb->servoD.servoStatus == SNERDY))
 	 			  motionb->taut_state = MC_WF_RELEASE;
@@ -142,15 +148,7 @@ void motion_cycle(struct motionth *motionb)
   } //switch
 }
 
-#define TAUT_WF_SERVO_RDY			0
-#define TAUT_INIT_SEQUENCE_GO_UP	1
-#define TAUT_INIT_SEQUENCE_WF_GO_UP 2
-#define TAUT_INIT_SEQUENCE_WF_GO_DN 3
-#define TAUT_WF_RELEASE 			4
-#define TAUT_WF_CHANNEL				5
-#define TAUT_OP_CHANNEL				6
-#define TAUT_SC_OP_CHANNEL 			7
-#define	TAUT_SG_OP_CHANNEL			8
+
 
 motionInit(motiont *motionBlock)
 {
@@ -162,11 +160,9 @@ motionInit(motiont *motionBlock)
 	 servoNE_init(&(motionBlock->servoD));
 
 	//HAL_TIM_Encoder_Start_IT(motionBlock->encTim2, TIM_CHANNEL_ALL);
-	motionTimer_1.set_value=10;
+	motionTimer_1.set_value=100;
 	motionTimer_1.Callback=NULL;
 	initTimer(&motionTimer_1);
-
-
 }
 
 motion_Cycl(motiont *motionBlock)
