@@ -73,11 +73,11 @@ void motion_cycle(struct motionth *motionb)
 
 	  else if (SH_B && SD_C && SC_A)//SZERVO TESZT
 	  {
-		  	  servoGoForPulse(&motionb->servoB, 64);
+		  	  servoGoForPulse(&motionb->servoB, 256);
 	  }
 	  else if (SH_B && SD_C && SC_B)//SZERVO TESZT
 	  {
-		  	  servoGoForPulse(&motionb->servoB, -64);
+		  	  servoGoForPulse(&motionb->servoB, -256);
 	  }
 
 	  else if ((motionb->servoD.servoStatus!=SNERDY) && SD_B)
