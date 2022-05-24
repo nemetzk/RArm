@@ -69,7 +69,7 @@ servoFB_init(struct servoFBth *hservoFB)
 
 	//****** goForPulseCycleTimer init **********
 	hservoFB->goForPulseCycleTimer.Callback = servoGoForPulseCycl;
-	hservoFB->goForPulseCycleTimer.set_value = 25;
+	hservoFB->goForPulseCycleTimer.set_value = 10;
 	hservoFB->goForPulseCycleTimer.ownerPtr=hservoFB;
 	initTimer(&(hservoFB->goForPulseCycleTimer));
 	//********************************************
@@ -77,7 +77,7 @@ servoFB_init(struct servoFBth *hservoFB)
 	// csak az első szervó initnél hozunk létre összesen 1 timert
 	if (noServos == 1)
 	{
-		hservoFB->servoCycleTim.set_value = 25;
+		hservoFB->servoCycleTim.set_value = 50;
 		hservoFB->servoCycleTim.Callback = &servoCycle_Callback;
 		hservoFB->servoCycleTim.ownerPtr = hservoFB;
 		initTimer(&hservoFB->servoCycleTim);
@@ -126,9 +126,9 @@ void servoGoForPulseCycl(struct servoFBth *servoFB)
 {
 	if((servoFB->pulse_start) < (servoFB->pulse_dest))
 	{ //CW
-		if ( servoFB->encoder.val +260 >=servoFB->pulse_dest )
+		if ( servoFB->encoder.val + 0 >=servoFB->pulse_dest )
 		{
-			servoFB->CWcmd=0;
+			servoStop(servoFB);
 			servoFB->encoder.ownerPtr = NULL;
 			servoFB->encoder.Callback = NULL;
 		}
@@ -139,9 +139,9 @@ void servoGoForPulseCycl(struct servoFBth *servoFB)
 	}
 	else
 	{//CCW
-		if ( servoFB->encoder.val-260 <=  servoFB->pulse_dest)
+		if ( servoFB->encoder.val- 0 <=  servoFB->pulse_dest)
 		{
-			servoFB->CCWcmd=0;
+			servoStop(servoFB);
 			servoFB->encoder.ownerPtr = NULL;
 			servoFB->encoder.Callback = NULL;
 		}

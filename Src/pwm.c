@@ -62,6 +62,13 @@ void pwm_init(struct pwmchth *pwmch)
 			HAL_TIM_PWM_Start(pwmch->htim, pwmch->ch);
 	}
 
+	void set_MOTOR_spd(pwmcht *pwmch, int16_t spd)
+	{
+		pwmSet(pwmch,spd);
+		if (TIM_CHANNEL_STATE_GET(pwmch->htim, pwmch->ch) == HAL_TIM_CHANNEL_STATE_READY)
+			HAL_TIM_PWM_Start(pwmch->htim, pwmch->ch);
+	}
+
 	void set_MOTOR_STOP(pwmcht *pwmch)
 	{
 		pwmSet(pwmch,1500);

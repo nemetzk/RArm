@@ -25,4 +25,6 @@
 #define SG_B motionb->sbus.sbusCh[SG].digVal.B
 #define SG_C motionb->sbus.sbusCh[SG].digVal.C
 
+#define LS_VAL motionb->sbus.sbusCh[LS].scaledVal.value
+
 #endif /* INC_RC_CONFIGURATION_H_ */

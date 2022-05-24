@@ -81,6 +81,7 @@ void parseSbusMessage(struct sbusth *hsbus, uint8_t *sbus_msg_bytes);
 #define SG 11
 #define RS 15
 #define SH 6
+#define LS 13
 
 #define MAX_NO_SBUSES 2
 uint8_t no_sbuses;

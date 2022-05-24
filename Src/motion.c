@@ -24,6 +24,7 @@ myTimerType motionTimer_1;
 #define MC_WF_MOTION_B		5
 #define MC_WF_FORWARD		6
 #define MC_WF_TESZT 		7
+#define MC_WF_TESZT_DIRECT_SPD	8
 
 #define TAUT_WF_SERVO_RDY			0
 #define TAUT_INIT_SEQUENCE_GO_UP	1
@@ -76,13 +77,21 @@ void motion_cycle(struct motionth *motionb)
 	  }
 	  else if (SH_B && SD_C && SC_A)//SZERVO TESZT
 	  {
-		  	  servoGoForPulse(&motionb->servoB, 1020);
+		  	  servoGoForPulse(&motionb->servoB, 1024);
 		  	  motionb->taut_state = MC_WF_TESZT;
 	  }
 	  else if (SH_B && SD_C && SC_B)//SZERVO TESZT
 	  {
-		  	  servoGoForPulse(&motionb->servoB, -1020);
+		  	  servoGoForPulse(&motionb->servoB, -1024);
 		  	  motionb->taut_state = MC_WF_TESZT;
+	  }
+	  else if (SH_B && SD_C && SC_C)//SZERVO TESZT
+	  {
+		  motionb->sbus.sbusCh[LS].scaledVal.min = 500;
+		  motionb->sbus.sbusCh[LS].scaledVal.max = 1000;
+		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 1;
+		  	  set_MOTOR_spd(&motionb->servoB.pwmch, LS_VAL);
+		  	  motionb->taut_state = MC_WF_TESZT_DIRECT_SPD;
 	  }
 	  else if ((motionb->servoD.servoStatus!=SNERDY) && SD_B)
 			motionb->taut_state = MC_WF_BACKWARD;
@@ -145,6 +154,18 @@ void motion_cycle(struct motionth *motionb)
 	  if ((motionb->servoB.servoStatus == SNERDY))
 	  	 			  motionb->taut_state = MC_WF_RELEASE;
   break;
+
+  case MC_WF_TESZT_DIRECT_SPD:
+
+	  if (!SH_B)
+	  {
+		  servoStop(&motionb->servoB);
+	  }
+	  else
+	  {
+		  set_MOTOR_spd(&motionb->servoB.pwmch, LS_VAL);
+	  }
+	  break;
   } //switch
 }
 

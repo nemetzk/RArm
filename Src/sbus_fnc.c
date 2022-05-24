@@ -160,7 +160,7 @@ void parseSbusMessage(struct sbusth *hsbus, uint8_t *sbus_msg_bytes)
 
 			if (hsbus->sbusCh[i].scaledVal.calculationEnabled&&((hsbus->sbusCh[i].rawVal.max - hsbus->sbusCh[i].rawVal.min)>0))
 			{
-				szamlalo 	= hsbus->sbusCh[i].rawVal.value*( hsbus->sbusCh[i].scaledVal.max - hsbus->sbusCh[i].scaledVal.min);
+				szamlalo 	= (hsbus->sbusCh[i].rawVal.value- hsbus->sbusCh[i].rawVal.min)*( hsbus->sbusCh[i].scaledVal.max - hsbus->sbusCh[i].scaledVal.min);
 				nevezo 		= hsbus->sbusCh[i].rawVal.max - hsbus->sbusCh[i].rawVal.min;
 				hsbus->sbusCh[i].scaledVal.value = (int16_t)(szamlalo/nevezo) + hsbus->sbusCh[i].scaledVal.min;
 
