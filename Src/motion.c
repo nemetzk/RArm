@@ -25,6 +25,7 @@ myTimerType motionTimer_1;
 #define MC_WF_FORWARD		6
 #define MC_WF_TESZT 		7
 #define MC_WF_TESZT_DIRECT_SPD	8
+#define	MC_PID_CONTROL			9
 
 #define TAUT_WF_SERVO_RDY			0
 #define TAUT_INIT_SEQUENCE_GO_UP	1
@@ -35,6 +36,7 @@ myTimerType motionTimer_1;
 #define TAUT_OP_CHANNEL				6
 #define TAUT_SC_OP_CHANNEL 			7
 #define	TAUT_SG_OP_CHANNEL			8
+
 
 void motion_cycle(struct motionth *motionb)
 {
@@ -80,11 +82,12 @@ void motion_cycle(struct motionth *motionb)
 		  	  servoGoForPulse(&motionb->servoB, 1024);
 		  	  motionb->taut_state = MC_WF_TESZT;
 	  }
+	  /*
 	  else if (SH_B && SD_C && SC_B)//SZERVO TESZT
 	  {
 		  	  servoGoForPulse(&motionb->servoB, -1024);
 		  	  motionb->taut_state = MC_WF_TESZT;
-	  }
+	  }*/
 	  else if (SH_B && SD_C && SC_C)//SZERVO TESZT
 	  {
 		  motionb->sbus.sbusCh[LS].scaledVal.min = 500;
@@ -92,6 +95,24 @@ void motion_cycle(struct motionth *motionb)
 		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 1;
 		  	  set_MOTOR_spd(&motionb->servoB.pwmch, LS_VAL);
 		  	  motionb->taut_state = MC_WF_TESZT_DIRECT_SPD;
+	  }
+	  else if (SH_B && SD_C && SC_B)//PID TESZT
+	  {
+		  motionb->sbus.sbusCh[LS].scaledVal.min = 500;
+		  motionb->sbus.sbusCh[LS].scaledVal.max = 1000;
+		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 1;
+
+		  motionb->sbus.sbusCh[RS].scaledVal.min = 500;
+		  motionb->sbus.sbusCh[RS].scaledVal.max = 1000;
+		  motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled = 1;
+
+		  motionb->sbus.sbusCh[S2].scaledVal.min = 500;
+		  motionb->sbus.sbusCh[S2].scaledVal.max = 1000;
+		  motionb->sbus.sbusCh[S2].scaledVal.calculationEnabled = 1;
+
+
+
+		  motionb->taut_state = MC_PID_CONTROL;
 	  }
 	  else if ((motionb->servoD.servoStatus!=SNERDY) && SD_B)
 			motionb->taut_state = MC_WF_BACKWARD;
@@ -159,12 +180,25 @@ void motion_cycle(struct motionth *motionb)
 
 	  if (!SH_B)
 	  {
+		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
 		  servoStop(&motionb->servoB);
 	  }
 	  else
 	  {
 		  set_MOTOR_spd(&motionb->servoB.pwmch, LS_VAL);
 	  }
+	  break;
+  case MC_PID_CONTROL:
+
+
+	  if (!SH_B)
+	  {
+		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
+		  motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled = 0;
+		  motionb->sbus.sbusCh[S2].scaledVal.calculationEnabled = 0;
+		  servoStop(&motionb->servoB);
+	  }
+
 	  break;
   } //switch
 }
