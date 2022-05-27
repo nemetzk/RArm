@@ -10,6 +10,7 @@
 
 #include "encoder.h"
 #include "pwm.h"
+#include "pid.h"
 
 #define S_STOP 			1
 #define S_MOVE_CW 		2
@@ -40,6 +41,7 @@ typedef struct servoFBth
 	uint8_t servoStatus;
 	int8_t subProcessState;
 	int32_t pos;
+	pidt myPID;
 	myTimerType goForTimer;
 	myTimerType goForPulseCycleTimer;
 	myTimerType servoCycleTim; //obsolete

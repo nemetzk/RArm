@@ -10,20 +10,33 @@
 
 #include "scaling.h"
 
-typedef struct pidProcessVarsth
+#define INT32MAX 0x7FFFFFFF 	// 2 147 483 647
+#define INT32MIN 0x80000000 	//-2 147 483 646
+
+#define ERROR_MAX		400
+#define ERROR_MIN	   -ERROR_MAX
+#define DERIVATIVE_MAX	500
+#define DERIVATIVE_MIN -DERIVATIVE_MAX
+#define INTEGRAL_MAX	500
+#define INTEGRAL_MIN   -INTEGRAL_MAX
+
+#define CONTROL_VAR_MAX 400000
+#define CONTROL_VAR_MIN -CONTROL_VAR_MAX
+
+typedef struct pidOpVarsth
 {
 	int32_t Error;
 	int32_t lastError;
 	int32_t Integral;
 	int32_t Derivative;
-	scaledNumItemth ControlVariable; //ez az output skálázatlanul
+	scaledNumt ControlVariable; //ez az output skálázatlanul
 
-}pidProcessVarst;
+}pidOpVarst;
 
 typedef struct pidInputsth
 {
-	scaledNumItemth SetPoint;
-	scaledNumItemth ProcessVariable;
+	scaledNumt SetPoint;
+	scaledNumt ProcessVariable;
 
 }pidInputst;
 
@@ -42,9 +55,9 @@ typedef struct pidSettingsth
 typedef struct pidth
 {
 	pidSettingst settings;
-	pidProcessVarst processVariables;
-	pid
-	myTimerType PIDCycleTimer;
+	pidOpVarst opVariables;
+	pidInputst Inputs;
+
 }pidt;
 
 

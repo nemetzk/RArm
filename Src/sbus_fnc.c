@@ -167,3 +167,18 @@ void parseSbusMessage(struct sbusth *hsbus, uint8_t *sbus_msg_bytes)
 			}
 		}
 }
+
+void refreshSbusCh(struct sbusChth *sbusCh)
+{
+	int32_t szamlalo;
+	int16_t nevezo;
+
+	if (sbusCh->scaledVal.calculationEnabled&&((sbusCh->rawVal.max - sbusCh->rawVal.min)>0))
+		{
+			szamlalo 	= (sbusCh->rawVal.value - sbusCh->rawVal.min)*( sbusCh->scaledVal.max - sbusCh->scaledVal.min);
+			nevezo 		= sbusCh->rawVal.max - sbusCh->rawVal.min;
+			sbusCh->scaledVal.value = (int16_t)(szamlalo/nevezo) + sbusCh->scaledVal.min;
+
+		}
+
+}

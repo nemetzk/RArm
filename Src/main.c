@@ -172,7 +172,6 @@ int main(void)
     /* USER CODE END WHILE */
 
 
-	  motion_cycle(&motionBlock);
 
 
     /* USER CODE BEGIN 3 */

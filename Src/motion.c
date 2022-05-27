@@ -8,6 +8,7 @@
 #include "motion.h"
 #include "ServoFB.h"
 #include "main.h"
+#include "pid.h"
 
 #define MT_RESET		0
 #define MT_WF_START		1
@@ -98,19 +99,45 @@ void motion_cycle(struct motionth *motionb)
 	  }
 	  else if (SH_B && SD_C && SC_B)//PID TESZT
 	  {
-		  motionb->sbus.sbusCh[LS].scaledVal.min = 500;
+		  motionb->sbus.sbusCh[LS].scaledVal.min = 0;
 		  motionb->sbus.sbusCh[LS].scaledVal.max = 1000;
 		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 1;
+		  refreshSbusCh(&(motionb->sbus.sbusCh[LS]));
 
-		  motionb->sbus.sbusCh[RS].scaledVal.min = 500;
+		  motionb->sbus.sbusCh[RS].scaledVal.min = 0;
 		  motionb->sbus.sbusCh[RS].scaledVal.max = 1000;
 		  motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled = 1;
+		  refreshSbusCh(&(motionb->sbus.sbusCh[RS]));
 
-		  motionb->sbus.sbusCh[S2].scaledVal.min = 500;
+		  motionb->sbus.sbusCh[S2].rawVal.min = 0;
+		  motionb->sbus.sbusCh[S2].rawVal.max = 1750;
+		  motionb->sbus.sbusCh[S2].scaledVal.min = 0;
 		  motionb->sbus.sbusCh[S2].scaledVal.max = 1000;
 		  motionb->sbus.sbusCh[S2].scaledVal.calculationEnabled = 1;
+		  refreshSbusCh(&(motionb->sbus.sbusCh[S2]));
+
+		  motionb->servoB.myPID.settings.Kp = motionb->sbus.sbusCh[LS].scaledVal.value;
+		  motionb->servoB.myPID.settings.Ki = motionb->sbus.sbusCh[RS].scaledVal.value;
+		  motionb->servoB.myPID.settings.Kd = motionb->sbus.sbusCh[S2].scaledVal.value;
+
+		  motionb->servoB.myPID.Inputs.SetPoint.RawInput.value = 1024;
+		  motionb->servoB.myPID.Inputs.SetPoint.RawInput.max = 11520;
+		  motionb->servoB.myPID.Inputs.SetPoint.RawInput.min = -11520;
+		  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.max = 23040;
+		  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.min = 0;
+
+		  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.max = 65534;
+		  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.min = 0;
+		  motionb->servoB.myPID.Inputs.ProcessVariable.ScaledOutput.max = 23040;
+		  motionb->servoB.myPID.Inputs.ProcessVariable.ScaledOutput.min = 0;
+
+		  motionb->servoB.myPID.opVariables.ControlVariable.RawInput.max = CONTROL_VAR_MAX;
+		  motionb->servoB.myPID.opVariables.ControlVariable.RawInput.min = CONTROL_VAR_MIN;
+		  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.max = 1000;
+		  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.min = 500;
 
 
+		  pidInit(&(motionb->servoB.myPID));
 
 		  motionb->taut_state = MC_PID_CONTROL;
 	  }
@@ -182,6 +209,7 @@ void motion_cycle(struct motionth *motionb)
 	  {
 		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
 		  servoStop(&motionb->servoB);
+		  motionb->taut_state = MC_WF_RELEASE;
 	  }
 	  else
 	  {
@@ -189,18 +217,27 @@ void motion_cycle(struct motionth *motionb)
 	  }
 	  break;
   case MC_PID_CONTROL:
-
-
+	  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.value = motionb->servoB.encoder.val;
+	  pidCalc(&(motionb->servoB.myPID));
+	  if((motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.value >= 500) &&
+	     (motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.value <= 1000)
+	  	  )
+	  	  {
+		  	  set_MOTOR_spd(&motionb->servoB.pwmch, motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.value);
+	  	  }
 	  if (!SH_B)
 	  {
 		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
 		  motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled = 0;
 		  motionb->sbus.sbusCh[S2].scaledVal.calculationEnabled = 0;
 		  servoStop(&motionb->servoB);
+		  motionb->taut_state = MC_WF_RELEASE;
 	  }
 
 	  break;
+
   } //switch
+  setTimer(&motionTimer_1);
 }
 
 
@@ -216,14 +253,12 @@ motionInit(motiont *motionBlock)
 
 	//HAL_TIM_Encoder_Start_IT(motionBlock->encTim2, TIM_CHANNEL_ALL);
 	motionTimer_1.set_value=100;
-	motionTimer_1.Callback=NULL;
+	motionTimer_1.ownerPtr = motionBlock;
+	motionTimer_1.Callback=	  motion_cycle;
 	initTimer(&motionTimer_1);
+	setTimer(&motionTimer_1);
 }
 
-motion_Cycl(motiont *motionBlock)
-{
-
-}
 
 uint8_t mt_aut_state;
 /*

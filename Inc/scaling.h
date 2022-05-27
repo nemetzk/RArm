@@ -5,7 +5,6 @@
 #include "math.h"
 #include "timerFunctions.h"
 
-
 typedef struct scaledNumItemth
 {
 	int32_t value;
@@ -17,19 +16,21 @@ typedef struct scaleHelpersth
 {
 	int32_t szamlalo;
 	int32_t nevezo;
-	int32_t tenyezo;
+	double tenyezo;
 }scaleHelperst;
-
 
 
 typedef struct scaledNumth
 {
-	uint8_t calculationEnabled;
+	uint8_t number;
+	//void *ownerPtr;
 	scaledNumItemt ScaledOutput;
 	scaledNumItemt RawInput;
 	scaleHelperst helpers;
 	uint8_t calculationError;
-	uint8_t initDone;
 }scaledNumt;
+
+#define NO_SCALE_INPUTS 		10
+#define NO_SCALE_OUTPUTS 		10
 
 #endif

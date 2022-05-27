@@ -73,8 +73,8 @@ typedef struct sbusth
 }sbust;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
-
 void parseSbusMessage(struct sbusth *hsbus, uint8_t *sbus_msg_bytes);
+void refreshSbusCh(struct sbusChth *sbusCh);
 
 #define SD 7
 #define SC 10
