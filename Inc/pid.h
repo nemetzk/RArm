@@ -13,15 +13,23 @@
 #define INT32MAX 0x7FFFFFFF 	// 2 147 483 647
 #define INT32MIN 0x80000000 	//-2 147 483 646
 
-#define ERROR_MAX		400
+#define  PID_CYCLE_INTERVAL     100
+
+#define PROP_LS_MAX				1000
+#define INT_RS_MAX				500
+#define DERIV_S2_MAX			1000
+
+#define ERROR_MAX		500
 #define ERROR_MIN	   -ERROR_MAX
+
 #define DERIVATIVE_MAX	500
 #define DERIVATIVE_MIN -DERIVATIVE_MAX
 #define INTEGRAL_MAX	500
 #define INTEGRAL_MIN   -INTEGRAL_MAX
 
-#define CONTROL_VAR_MAX 400000
+#define CONTROL_VAR_MAX 600000
 #define CONTROL_VAR_MIN -CONTROL_VAR_MAX
+
 
 typedef struct pidOpVarsth
 {
@@ -60,5 +68,7 @@ typedef struct pidth
 
 }pidt;
 
+void pidInitStartup(pidt *hpid);
+void pidInit(pidt *hpid);
 
 #endif /* INC_PID_H_ */

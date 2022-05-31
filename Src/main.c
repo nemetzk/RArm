@@ -121,10 +121,6 @@ void motion_init (struct motionth *motionb)
 	motionb->sbus.sbusCh[SH].digVal.calculationEnabled=1;
 	motionb->sbus.sbusCh[SH].digVal.Aval = 500;
 	motionb->sbus.sbusCh[SH].digVal.Bval = 2000;
-
-	motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled=1;
-	motionb->sbus.sbusCh[RS].scaledVal.min=0;
-	motionb->sbus.sbusCh[RS].scaledVal.min=2000;
 }
 
 int main(void)

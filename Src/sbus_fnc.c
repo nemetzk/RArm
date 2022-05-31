@@ -13,6 +13,8 @@
 void sbusCommTimeOver(struct sbusth *hsbus)
 {
 	hsbus->sbusHealth.sbusTimeOut = 1;
+	HAL_UART_Receive_IT(hsbus->sbusUart, &(hsbus->func.oneCharBuffer), 1);
+	setTimer(&(hsbus->func.sbusTimer));
 }
 
 void SBUS_init(struct sbusth *hsbus)
@@ -58,6 +60,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 			if (sbuses[eidx]->func.sbusTimer.cur_value > 15)
 			{
+				parseSbusMessage(sbuses[eidx],sbuses[eidx]->func.SBUS_rxBuffer);
 				sbuses[eidx]->func.no_char =0;
 			}
 			else
@@ -65,7 +68,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 				sbuses[eidx]->func.no_char++;
 			}
 			sbuses[eidx]->func.SBUS_rxBuffer[sbuses[eidx]->func.no_char]=sbuses[eidx]->func.oneCharBuffer;
-			parseSbusMessage(sbuses[eidx],sbuses[eidx]->func.SBUS_rxBuffer);
 			HAL_UART_Receive_IT(huart, &(sbuses[eidx]->func.oneCharBuffer), 1);
 			setTimer(&(sbuses[eidx]->func.sbusTimer));
 		  }
@@ -78,7 +80,7 @@ void parseSbusMessage(struct sbusth *hsbus, uint8_t *sbus_msg_bytes)
 	int16_t nevezo;
 	  // Decode the 16 regular channels
 
-	hsbus->sbusHealth.sbusTimeOut = 0;
+
 
 	hsbus->sbusCh[1].rawVal.value  =
 	      (((uint16_t)sbus_msg_bytes[1]) | ((uint16_t)sbus_msg_bytes[2] << 8)) &
@@ -136,7 +138,7 @@ void parseSbusMessage(struct sbusth *hsbus, uint8_t *sbus_msg_bytes)
 			                           ((uint16_t)0x04));
 	hsbus->sbusHealth. failsafeActivated = (((uint16_t)sbus_msg_bytes[23]) &
 			                           ((uint16_t)0x08));
-
+/*
 	for (i=0;i<17;i++)
 		{
 
@@ -165,6 +167,52 @@ void parseSbusMessage(struct sbusth *hsbus, uint8_t *sbus_msg_bytes)
 				hsbus->sbusCh[i].scaledVal.value = (int16_t)(szamlalo/nevezo) + hsbus->sbusCh[i].scaledVal.min;
 
 			}
+*/
+
+	hsbus->sbusHealth.sbusTimeOut = 0;
+}
+
+void refreshSbusDigitChs(struct sbusth *hsbus)
+{
+	uint8_t i;
+	for (i=0;i<17;i++)
+		{
+
+			if (hsbus->sbusCh[i].digVal.calculationEnabled)
+			{
+				if (hsbus->sbusCh[i].rawVal.value <hsbus->sbusCh[i].digVal.Aval)
+					hsbus->sbusCh[i].digVal.A = 1;
+				else
+					hsbus->sbusCh[i].digVal.A = 0;
+
+				if ((hsbus->sbusCh[i].rawVal.value >= hsbus->sbusCh[i].digVal.Aval) && (hsbus->sbusCh[i].rawVal.value < hsbus->sbusCh[i].digVal.Bval))
+					hsbus->sbusCh[i].digVal.B= 1;
+				else
+					hsbus->sbusCh[i].digVal.B = 0;
+
+				if (hsbus->sbusCh[i].rawVal.value >=hsbus->sbusCh[i].digVal.Bval )
+					hsbus->sbusCh[i].digVal.C= 1;
+				else
+					hsbus->sbusCh[i].digVal.C = 0;
+			}
+		}
+}
+
+void refreshSbusAnChs(struct sbusth *hsbus)
+{
+ int32_t szamlalo;
+ int16_t nevezo;
+ uint8_t i;
+
+	for (i=0;i<17;i++)
+		{
+			if (hsbus->sbusCh[i].scaledVal.calculationEnabled&&((hsbus->sbusCh[i].rawVal.max - hsbus->sbusCh[i].rawVal.min)>0))
+			{
+				szamlalo 	= (hsbus->sbusCh[i].rawVal.value- hsbus->sbusCh[i].rawVal.min)*( hsbus->sbusCh[i].scaledVal.max - hsbus->sbusCh[i].scaledVal.min);
+				nevezo 		= hsbus->sbusCh[i].rawVal.max - hsbus->sbusCh[i].rawVal.min;
+				hsbus->sbusCh[i].scaledVal.value = (int16_t)(szamlalo/nevezo) + hsbus->sbusCh[i].scaledVal.min;
+
+			}
 		}
 }
 
@@ -172,7 +220,6 @@ void refreshSbusCh(struct sbusChth *sbusCh)
 {
 	int32_t szamlalo;
 	int16_t nevezo;
-
 	if (sbusCh->scaledVal.calculationEnabled&&((sbusCh->rawVal.max - sbusCh->rawVal.min)>0))
 		{
 			szamlalo 	= (sbusCh->rawVal.value - sbusCh->rawVal.min)*( sbusCh->scaledVal.max - sbusCh->scaledVal.min);
@@ -180,5 +227,4 @@ void refreshSbusCh(struct sbusChth *sbusCh)
 			sbusCh->scaledVal.value = (int16_t)(szamlalo/nevezo) + sbusCh->scaledVal.min;
 
 		}
-
 }

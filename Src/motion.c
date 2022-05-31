@@ -41,6 +41,7 @@ myTimerType motionTimer_1;
 
 void motion_cycle(struct motionth *motionb)
 {
+	refreshSbusDigitChs(&motionb->sbus);
   switch (motionb->taut_state)
   {
   case MC_WF_SERVO_RDY:
@@ -59,6 +60,7 @@ void motion_cycle(struct motionth *motionb)
   break;
 
   case MC_WF_START_SIGNAL:
+	  refreshSbusAnChs(&motionb->sbus);
 	  rcCopy(&(motionb->servoC));
 
 	  if (SH_B && SC_A && SD_A)//NINCS HÁTRAMENETEL CSAK ÁTALAKULÁS
@@ -91,52 +93,17 @@ void motion_cycle(struct motionth *motionb)
 	  }*/
 	  else if (SH_B && SD_C && SC_C)//SZERVO TESZT
 	  {
-		  motionb->sbus.sbusCh[LS].scaledVal.min = 500;
-		  motionb->sbus.sbusCh[LS].scaledVal.max = 1000;
+		  motionb->sbus.sbusCh[LS].scaledVal.min = 0;
+		  motionb->sbus.sbusCh[LS].scaledVal.max = 3000;
 		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 1;
 		  	  set_MOTOR_spd(&motionb->servoB.pwmch, LS_VAL);
 		  	  motionb->taut_state = MC_WF_TESZT_DIRECT_SPD;
 	  }
 	  else if (SH_B && SD_C && SC_B)//PID TESZT
 	  {
-		  motionb->sbus.sbusCh[LS].scaledVal.min = 0;
-		  motionb->sbus.sbusCh[LS].scaledVal.max = 1000;
-		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 1;
-		  refreshSbusCh(&(motionb->sbus.sbusCh[LS]));
-
-		  motionb->sbus.sbusCh[RS].scaledVal.min = 0;
-		  motionb->sbus.sbusCh[RS].scaledVal.max = 1000;
-		  motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled = 1;
-		  refreshSbusCh(&(motionb->sbus.sbusCh[RS]));
-
-		  motionb->sbus.sbusCh[S2].rawVal.min = 0;
-		  motionb->sbus.sbusCh[S2].rawVal.max = 1750;
-		  motionb->sbus.sbusCh[S2].scaledVal.min = 0;
-		  motionb->sbus.sbusCh[S2].scaledVal.max = 1000;
-		  motionb->sbus.sbusCh[S2].scaledVal.calculationEnabled = 1;
-		  refreshSbusCh(&(motionb->sbus.sbusCh[S2]));
-
 		  motionb->servoB.myPID.settings.Kp = motionb->sbus.sbusCh[LS].scaledVal.value;
 		  motionb->servoB.myPID.settings.Ki = motionb->sbus.sbusCh[RS].scaledVal.value;
 		  motionb->servoB.myPID.settings.Kd = motionb->sbus.sbusCh[S2].scaledVal.value;
-
-		  motionb->servoB.myPID.Inputs.SetPoint.RawInput.value = 1024;
-		  motionb->servoB.myPID.Inputs.SetPoint.RawInput.max = 11520;
-		  motionb->servoB.myPID.Inputs.SetPoint.RawInput.min = -11520;
-		  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.max = 23040;
-		  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.min = 0;
-
-		  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.max = 65534;
-		  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.min = 0;
-		  motionb->servoB.myPID.Inputs.ProcessVariable.ScaledOutput.max = 23040;
-		  motionb->servoB.myPID.Inputs.ProcessVariable.ScaledOutput.min = 0;
-
-		  motionb->servoB.myPID.opVariables.ControlVariable.RawInput.max = CONTROL_VAR_MAX;
-		  motionb->servoB.myPID.opVariables.ControlVariable.RawInput.min = CONTROL_VAR_MIN;
-		  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.max = 1000;
-		  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.min = 500;
-
-
 		  pidInit(&(motionb->servoB.myPID));
 
 		  motionb->taut_state = MC_PID_CONTROL;
@@ -218,6 +185,12 @@ void motion_cycle(struct motionth *motionb)
 	  break;
   case MC_PID_CONTROL:
 	  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.value = motionb->servoB.encoder.val;
+/*
+	  motionb->servoB.myPID.settings.Kp = motionb->sbus.sbusCh[LS].scaledVal.value;
+	  motionb->servoB.myPID.settings.Ki = motionb->sbus.sbusCh[RS].scaledVal.value;
+	  motionb->servoB.myPID.settings.Kd = motionb->sbus.sbusCh[S2].scaledVal.value;
+*/
+
 	  pidCalc(&(motionb->servoB.myPID));
 	  if((motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.value >= 500) &&
 	     (motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.value <= 1000)
@@ -225,11 +198,11 @@ void motion_cycle(struct motionth *motionb)
 	  	  {
 		  	  set_MOTOR_spd(&motionb->servoB.pwmch, motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.value);
 	  	  }
-	  if (!SH_B)
+	  if (!SH_B || motionb->sbus.sbusHealth.sbusTimeOut)
 	  {
-		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
-		  motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled = 0;
-		  motionb->sbus.sbusCh[S2].scaledVal.calculationEnabled = 0;
+		  //motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
+		  //motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled = 0;
+		  //motionb->sbus.sbusCh[S2].scaledVal.calculationEnabled = 0;
 		  servoStop(&motionb->servoB);
 		  motionb->taut_state = MC_WF_RELEASE;
 	  }
@@ -240,19 +213,64 @@ void motion_cycle(struct motionth *motionb)
   setTimer(&motionTimer_1);
 }
 
+pidInpuVarInit(motiont *motionb)
+{
+	  motionb->sbus.sbusCh[LS].rawVal.min = 165;
+	  motionb->sbus.sbusCh[LS].rawVal.max = 1799;
+	  motionb->sbus.sbusCh[LS].scaledVal.min = 0;
+	  motionb->sbus.sbusCh[LS].scaledVal.max = PROP_LS_MAX;
+	  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 1;
+	  refreshSbusCh(&(motionb->sbus.sbusCh[LS]));
 
+	  motionb->sbus.sbusCh[RS].rawVal.min = 141;
+	  motionb->sbus.sbusCh[RS].rawVal.max = 1738;
+	  motionb->sbus.sbusCh[RS].scaledVal.min = 0;
+	  motionb->sbus.sbusCh[RS].scaledVal.max = INT_RS_MAX;
+	  motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled = 1;
+	  refreshSbusCh(&(motionb->sbus.sbusCh[RS]));
+
+	  motionb->sbus.sbusCh[S2].rawVal.min = 37;
+	  motionb->sbus.sbusCh[S2].rawVal.max = 1807;
+	  motionb->sbus.sbusCh[S2].scaledVal.min = 0;
+	  motionb->sbus.sbusCh[S2].scaledVal.max = DERIV_S2_MAX;
+	  motionb->sbus.sbusCh[S2].scaledVal.calculationEnabled = 1;
+	  refreshSbusCh(&(motionb->sbus.sbusCh[S2]));
+
+
+	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.value = 360;
+	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.max = 11565;
+	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.min = -11565;
+	  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.max = 23130;
+	  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.min = 0;
+
+	  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.max = 65534;
+	  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.min = 0;
+	  motionb->servoB.myPID.Inputs.ProcessVariable.ScaledOutput.max = 23130;
+	  motionb->servoB.myPID.Inputs.ProcessVariable.ScaledOutput.min = 0;
+
+	  motionb->servoB.myPID.opVariables.ControlVariable.RawInput.max = CONTROL_VAR_MAX;
+	  motionb->servoB.myPID.opVariables.ControlVariable.RawInput.min = CONTROL_VAR_MIN;
+	  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.max = 1000;
+	  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.min = 500;
+
+}
 
 motionInit(motiont *motionBlock)
 {
 	 SBUS_init(&motionBlock->sbus);
+
+
 
 	 servoFB_init(&(motionBlock->servoA));
 	 servoFB_init(&(motionBlock->servoB));
 	 servoNE_init(&(motionBlock->servoC));
 	 servoNE_init(&(motionBlock->servoD));
 
+	 pidInpuVarInit(motionBlock);
+	 pidInitStartup(&(motionBlock->servoB.myPID));
+
 	//HAL_TIM_Encoder_Start_IT(motionBlock->encTim2, TIM_CHANNEL_ALL);
-	motionTimer_1.set_value=100;
+	motionTimer_1.set_value = PID_CYCLE_INTERVAL;
 	motionTimer_1.ownerPtr = motionBlock;
 	motionTimer_1.Callback=	  motion_cycle;
 	initTimer(&motionTimer_1);

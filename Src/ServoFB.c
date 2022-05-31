@@ -75,6 +75,8 @@ servoFB_init(struct servoFBth *hservoFB)
 	//********************************************
 	// szervókat egyszerre kezelő ciklusfüggvényt meghívó timer készítése
 	// csak az első szervó initnél hozunk létre összesen 1 timert
+
+
 	if (noServos == 1)
 	{
 		hservoFB->servoCycleTim.set_value = 50;

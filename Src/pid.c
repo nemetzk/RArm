@@ -57,11 +57,16 @@ void pidCalc(pidt *hpid)
 	calcScaledVal(&(hpid->opVariables.ControlVariable));
 }
 
-void pidInit(pidt *hpid)
+void pidInitStartup(pidt *hpid)
 {
 	initScaledVal(&(hpid->Inputs.ProcessVariable));
 	initScaledVal(&(hpid->Inputs.SetPoint));
 	initScaledVal(&(hpid->opVariables.ControlVariable));
+
+}
+
+void pidInit(pidt *hpid)
+{
 
 	calcScaledVal(&(hpid->Inputs.ProcessVariable));
 	calcScaledVal(&(hpid->Inputs.SetPoint));
