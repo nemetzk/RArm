@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "timerFunctions.h"
 #include "stm32F4xx_hal.h"
+#include "averageCalc.h"
 
 static uint32_t Period = 65535;
 
@@ -31,8 +32,11 @@ typedef struct Encoderh{
 	TIM_HandleTypeDef *enctim;
 	myTimerType encoderTim;
 	myTimerType encoderMeasTim;
+	myTimerType encoderCyclTim;
+	uint8_t timeToMeasSpd;
 	void *ownerPtr;
 	void (*Callback)(void *callBackPtr);
+	averageCalct encAVG;
 }Encoder;
 
 

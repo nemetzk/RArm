@@ -51,6 +51,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 motiont motionBlock;
+averageCalct avgTest;
+uint8_t myidx;
 
 /* USER CODE END PV */
 
@@ -157,7 +159,7 @@ int main(void)
 
   TimerekSetup(&htim4);
   motion_init (&motionBlock);
-
+  //avgTest.stackCapacity = 7;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -165,7 +167,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+	/*  if (++myidx>=254)
+		  myidx = 1;
+	  averageCalcCycl(&avgTest,myidx);*/
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

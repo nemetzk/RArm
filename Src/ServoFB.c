@@ -323,6 +323,7 @@ void ServoStatusCycl(struct servoFBth *servoFB)
 			}
 	break;
 	case SCW:
+
 		if (servoFB->processTime.cur_value> 300)
 		{
 			if (servoFB->CWcmd)

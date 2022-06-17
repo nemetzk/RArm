@@ -41,6 +41,7 @@ void calculateReversedValue(Encoder *hencoder)
 }
 void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas fv-t
 {
+	int16_t encimpval;
 	switch (hencoder->state)
 	{
 	case EA_INIT:
@@ -73,7 +74,9 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 		if ((abs(hencoder->readVal - hencoder->preReadval)>1))
 				{
 					calculateReversedValue(hencoder);
+					/*
 					hencoder->speed = ((hencoder->val - hencoder->pre_val));
+					*/
 					hencoder->pre_val = hencoder->val;
 					if (hencoder->speed > 0)
 						hencoder->state = EA_MEASURE_PLS_POS;
@@ -88,7 +91,11 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 		if ((abs(hencoder->readVal - hencoder->preReadval)>1))
 				{
 					calculateReversedValue(hencoder);
-					hencoder->speed = ((hencoder->val - hencoder->pre_val));
+					/*
+					encimpval =(int16_t)(hencoder->val - hencoder->pre_val);
+					averageCalcCycl(&hencoder->encAVG,encimpval);
+					hencoder->speed = hencoder->encAVG.averageVal;
+					*/
 					hencoder->pre_val = hencoder->val;
 					if (hencoder->speed > 0)
 						hencoder->state = EA_MEASURE_PLS_POS;
@@ -108,7 +115,11 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 		if ((abs(hencoder->readVal - hencoder->preReadval)>1))
 				{
 					calculateReversedValue(hencoder);
-					hencoder->speed = (int16_t)((hencoder->val - hencoder->pre_val));
+					/*
+					encimpval =(int16_t)(hencoder->val - hencoder->pre_val);
+					averageCalcCycl(&hencoder->encAVG,encimpval);
+					hencoder->speed = hencoder->encAVG.averageVal;
+					*/
 					hencoder->pre_val = hencoder->val;
 					if (hencoder->speed > 0) hencoder->state = EA_MEASURE_PLS_POS;
 					if (hencoder->speed < 0) hencoder->state = EA_MEASURE_PLS_NEG;
@@ -149,31 +160,3 @@ void encoder_init(Encoder *hencoder, TIM_HandleTypeDef *htim)
 	HAL_TIM_Encoder_Start_IT(hencoder->enctim, TIM_CHANNEL_ALL);
 
 }
-/*
-void HAL_TIM_IC_CaptureCallback (TIM_HandleTypeDef *htim)
-{
-	uint8_t eidx = 0;
-	for (eidx=0;eidx<=noEncoders;eidx++)							 //encoder array -hez
-	{
-		//if (htim->Instance == encoders[eidx]->timNum)
-		if (htim == encoders[eidx]->enctim)
-		{
-			encoders[eidx]->readVal =  __HAL_TIM_GET_COUNTER(htim);
-
-			if (encoders[eidx]->pre_val!=encoders[eidx]->val)
-			{
-				setTimer(&(encoders[eidx]->encoderTim));
-			}
-
-				encoderAutomata_cycl(encoders[eidx]);
-
-				if (encoders[eidx]->Callback != NULL)
-				{
-					encoders[eidx]->Callback(encoders[eidx]->ownerPtr);
-				}
-				//encoders[eidx]->preReadval = encoders[eidx]->readVal;
-			}
-	}
-
-}
-*/
