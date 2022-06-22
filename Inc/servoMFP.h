@@ -1,16 +1,17 @@
 /*
- * ServoFB.h
+ * servoMFP.h
  *
- *  Created on: Jan 20, 2022
+ *  Created on: 2022. jún. 17.
  *      Author: nemet
  */
 
-#ifndef INC_SERVOFB_H_
-#define INC_SERVOFB_H_
+#ifndef INC_SERVOMFP_H_
+#define INC_SERVOMFP_H_
 
-#include "encoder.h"
+
 #include "pwm.h"
 #include "pid.h"
+#include "encoderMFP.h"
 
 
 #define S_STOP 			1
@@ -42,6 +43,7 @@ typedef struct servoFBth
 	uint8_t servoStatus;
 	int8_t subProcessState;
 	int32_t pos;
+	double speed;
 	pidt myPID;
 	myTimerType goForTimer;
 	myTimerType goForPulseCycleTimer;
@@ -69,6 +71,14 @@ typedef struct servoFBth
 
 //,,uint32_t *pwmCh
 void servoStop(struct servoFBth *servoFB);
-void servoGoForPulseCycl(struct servoFBth *servoFB);
+void servoCycle_Callback(void);
+servoInit(struct servoFBth *hservoFB);
+void ServoInitProcess(struct servoFBth *servoFB);
+void servoGoForTimeInit(struct servoFBth *servoFB);
+void servoGoForTime(struct servoFBth *servoFB,uint16_t setTime, int16_t motorSpeed);
+void servoPidCycl(struct servoFBth *servoFB);
+void ServoStatusCycl(struct servoFBth *servoFB);
+uint8_t servoGoPid(struct servoFBth *servo,int32_t dist);
 
-#endif /* INC_SERVOFB_H_ */
+
+#endif /* INC_SERVOMFP_H_ */

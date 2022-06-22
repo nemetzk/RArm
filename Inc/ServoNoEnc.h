@@ -12,6 +12,7 @@
 #define SNE_OPMODE_JOGMODE		1
 
 #include "pwm.h"
+#include "timerFunctions.h"
 
 typedef struct LSConfth
 {

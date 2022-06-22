@@ -1,3 +1,14 @@
+/*
+ * encoderMFP.h
+ *
+ *  Created on: 2022. jún. 17.
+ *      Author: nemet
+ */
+
+#ifndef INC_ENCODERMFP_H_
+#define INC_ENCODERMFP_H_
+
+
 #pragma once
 
 #include <stdint.h>
@@ -10,9 +21,8 @@ static uint32_t Period = 65535;
 //https://www.youtube.com/watch?v=MWdqny4OBvQ
 #define EA_INIT				0
 #define EA_WF_FIRST_PULSE	99
-#define EA_IDLE				1
-#define EA_MEASURE_PLS_POS	10
-#define EA_MEASURE_PLS_NEG	20
+#define EA_WORKING			 1
+
 
 int32_t debug_absval;
 
@@ -24,6 +34,12 @@ typedef struct Encoderh{
 	int32_t preReadval;
 	int32_t pre_val;
 	int32_t spd_preval;
+
+	int32_t diff_10ms;
+	int32_t diff_100ms;
+	int32_t preval_100ms;
+	uint8_t count_100ms;
+
 	int8_t state;		// ha +1 CW; ha -1 CCW; ha 0 nem mozog
 	int8_t reverseEncoderValue;
 	uint8_t pulseInitContinue;
@@ -40,6 +56,8 @@ typedef struct Encoderh{
 }Encoder;
 
 
-	//void encoderTimEA(void);
-	//void encoder2TimEA(void);
+void encoderAutomata_cycl(Encoder *hencoder);
+void encoder_init(Encoder *hencoder, TIM_HandleTypeDef *htim);
+void calculateReversedValue(Encoder *hencoder);
 
+#endif /* INC_ENCODERMFP_H_ */

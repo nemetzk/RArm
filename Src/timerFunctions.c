@@ -1,9 +1,6 @@
 
-#include "header.h"
 #include "main.h"
 #include "timerFunctions.h"
-
-
 
 static unsigned char notimers = 0;
 

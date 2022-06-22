@@ -36,6 +36,11 @@ void pidDerivativeCalc(pidt *hpid)
 
 void pidCalc(pidt *hpid)
 {
+	if (hpid->opVariables.justStartedFlg)
+	{
+		pidInit(hpid);
+		hpid->opVariables.justStartedFlg = 0;
+	}
 	calcScaledVal(&(hpid->Inputs.ProcessVariable));
 	calcScaledVal(&(hpid->Inputs.SetPoint));
 

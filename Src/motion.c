@@ -6,9 +6,12 @@
  */
 
 #include "motion.h"
-#include "ServoFB.h"
 #include "main.h"
 #include "pid.h"
+#include "ServoMFP.h"
+#include "opmodeManual.h"
+#include "opmodeSemi.h"
+#include "opmodeAut.h"
 
 #define MT_RESET		0
 #define MT_WF_START		1
@@ -18,15 +21,12 @@
 myTimerType motionTimer_1;
 
 #define MC_WF_SERVO_RDY		0
-#define MC_WF_RELEASE		1
-#define MC_WF_START_SIGNAL	2
-#define MC_WF_BACKWARD		3
-#define MC_WF_MOTION_A		4
-#define MC_WF_MOTION_B		5
-#define MC_WF_FORWARD		6
-#define MC_WF_TESZT 		7
-#define MC_WF_TESZT_DIRECT_SPD	8
-#define	MC_PID_CONTROL			9
+#define MC_WF_SUBMODULES	1
+#define MC_IDLE				2
+#define MC_OP_MODE_MANUAL	3
+#define MC_OP_MODE_SEMI		4
+#define MC_OP_MODE_AUT		5
+
 
 #define TAUT_WF_SERVO_RDY			0
 #define TAUT_INIT_SEQUENCE_GO_UP	1
@@ -41,183 +41,61 @@ myTimerType motionTimer_1;
 
 void motion_cycle(struct motionth *motionb)
 {
-	refreshSbusDigitChs(&motionb->sbus);
+  refreshSbusDigitChs(&motionb->sbus);
   switch (motionb->taut_state)
   {
   case MC_WF_SERVO_RDY:
-  	  if ((motionb->servoA.sInitState == S_INIT_DONE) && (motionb->servoA.servoStatus == SRDY))
-  		if ((motionb->servoB.sInitState == S_INIT_DONE) && (motionb->servoB.servoStatus == SRDY))
+  	  if ((motionb->servoA.sInitState == S_INIT_DONE))
+
+  		if ((motionb->servoB.sInitState == S_INIT_DONE))
   	  {
-  		motionb->taut_state = MC_WF_RELEASE;
+  		motionb->taut_state = MC_WF_SUBMODULES;
   	  }
   break;
 
-  case MC_WF_RELEASE:
-	  if (SH_A)
+  case MC_WF_SUBMODULES:
+	  opAutCycl(motionb);
+	  opManualCycl(motionb);
+	  opSemiCycl(motionb);
+	  if ((motionb->opManu.state == OPM_WF_IDLE &&
+		  motionb->opSemi.state == OPM_WF_IDLE &&
+		  motionb->opAut.state  == OPM_WF_IDLE) ||
+	      motionb->sbus.sbusHealth.sbusTimeOut  )
 	  {
-		  motionb->taut_state = MC_WF_START_SIGNAL;
+		  motionb->taut_state = MC_IDLE;
 	  }
   break;
 
-  case MC_WF_START_SIGNAL:
-	  refreshSbusAnChs(&motionb->sbus);
-	  rcCopy(&(motionb->servoC));
+  case MC_IDLE:
+	  if (SC_A)
+		  motionb->taut_state = MC_OP_MODE_MANUAL;
+	  else if (SC_B)
+		  motionb->taut_state = MC_OP_MODE_SEMI;
+	  else if (SC_C)
+	  	  motionb->taut_state = MC_OP_MODE_AUT;
 
-	  if (SH_B && SC_A && SD_A)//NINCS HÁTRAMENETEL CSAK ÁTALAKULÁS
-	  {
-  		servoGoForPulse(&motionb->servoA,90);
-	  }
-	  else if (SH_B && SC_C && SD_A) //NINCS HÁTRAMENETEL CSAK ÁTALAKULÁS
-	  {
-  		servoGoForPulse(&motionb->servoA,-90);
-	  }
-	  else if (SH_B && SD_B)//HÁTRAMENETELLEL
-	  {
-		  servoGoForTime_NE(&motionb->servoD, 4000, -1);
-	  }
-	  else if ((motionb->servoA.servoStatus!=SRDY) && SD_A)
-	  {
-			motionb->taut_state = MC_WF_MOTION_A;
-
-	  }
-	  else if (SH_B && SD_C && SC_A)//SZERVO TESZT
-	  {
-		  	  servoGoForPulse(&motionb->servoB, 1024);
-		  	  motionb->taut_state = MC_WF_TESZT;
-	  }
-	  /*
-	  else if (SH_B && SD_C && SC_B)//SZERVO TESZT
-	  {
-		  	  servoGoForPulse(&motionb->servoB, -1024);
-		  	  motionb->taut_state = MC_WF_TESZT;
-	  }*/
-	  else if (SH_B && SD_C && SC_C)//SZERVO TESZT
-	  {
-		  motionb->sbus.sbusCh[LS].scaledVal.min = 0;
-		  motionb->sbus.sbusCh[LS].scaledVal.max = 3000;
-		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 1;
-		  	  set_MOTOR_spd(&motionb->servoB.pwmch, LS_VAL);
-		  	  motionb->taut_state = MC_WF_TESZT_DIRECT_SPD;
-	  }
-	  else if (SH_B && SD_C && SC_B)//PID TESZT
-	  {
-		  motionb->servoA.myPID.settings.Kp = motionb->sbus.sbusCh[LS].scaledVal.value;
-		  motionb->servoA.myPID.settings.Ki = motionb->sbus.sbusCh[RS].scaledVal.value;
-		  motionb->servoA.myPID.settings.Kd = motionb->sbus.sbusCh[S2].scaledVal.value;
-
-		  motionb->servoB.myPID.settings.Kp = motionb->sbus.sbusCh[LS].scaledVal.value;
-		  motionb->servoB.myPID.settings.Ki = motionb->sbus.sbusCh[RS].scaledVal.value;
-		  motionb->servoB.myPID.settings.Kd = motionb->sbus.sbusCh[S2].scaledVal.value;
-
-		  pidInit(&(motionb->servoA.myPID));
-		  pidInit(&(motionb->servoB.myPID));
-
-		  motionb->taut_state = MC_PID_CONTROL;
-	  }
-	  else if ((motionb->servoD.servoStatus!=SNERDY) && SD_B)
-			motionb->taut_state = MC_WF_BACKWARD;
-  break;
-
-  case MC_WF_BACKWARD:
-	  if (motionb->servoD.servoStatus == SNERDY)
-	  {
-		  if (SC_A)
-		  {
-			  servoGoForPulse(&motionb->servoA,90);
-		  }
-		  else if(SC_C)
-		  {
-			  servoGoForPulse(&motionb->servoA,-90);
-		  }
-
-		  if ((motionb->servoA.servoStatus!=SRDY))
-		 	  {
-		 			motionb->taut_state = MC_WF_MOTION_A;
-
-		 	  }
-
-	  }
-  break;
-
-  case MC_WF_MOTION_A:
-	  if ((motionb->servoA.servoStatus==SRDY) || ((motionb->servoA.servoStatus==SHALT)))
-	  {
-		  if (SC_A)
-			  servoGoForPulse(&motionb->servoB,90);
-		  if (SC_C)
-		  			  servoGoForPulse(&motionb->servoB,-90);
-	  }
-	  if (motionb->servoB.servoStatus!=SRDY)
-				motionb->taut_state = MC_WF_MOTION_B;
-  break;
-
-  case MC_WF_MOTION_B:
-	  if ((motionb->servoB.servoStatus==SRDY) || ((motionb->servoB.servoStatus==SHALT)))
-	  {
-
-		  if(SD_A)
-			  motionb->taut_state = MC_WF_RELEASE;
-		  else if(SD_B)
-			  servoGoForTime_NE(&motionb->servoD, 4000, 1);
-
-		  if ((motionb->servoD.servoStatus!=SNERDY) && SD_B)
-			  motionb->taut_state = MC_WF_FORWARD;
-	  }
-
-  break;
-
-  case MC_WF_FORWARD:
-	  if ((motionb->servoD.servoStatus == SNERDY))
-	 			  motionb->taut_state = MC_WF_RELEASE;
-  break;
-
-  case MC_WF_TESZT:
-	  if ((motionb->servoB.servoStatus == SNERDY))
-	  	 			  motionb->taut_state = MC_WF_RELEASE;
-  break;
-
-  case MC_WF_TESZT_DIRECT_SPD:
-
-	  if (!SH_B)
-	  {
-		  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
-		  servoStop(&motionb->servoB);
-		  motionb->taut_state = MC_WF_RELEASE;
-	  }
-	  else
-	  {
-		  set_MOTOR_spd(&motionb->servoB.pwmch, LS_VAL);
-	  }
+	  //refreshSbusAnChs(&motionb->sbus);
 	  break;
-  case MC_PID_CONTROL:
-	  motionb->servoA.myPID.Inputs.ProcessVariable.RawInput.value = motionb->servoA.encoder.val;
-	  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.value = motionb->servoB.encoder.val;
-/*
-	  motionb->servoB.myPID.settings.Kp = motionb->sbus.sbusCh[LS].scaledVal.value;
-	  motionb->servoB.myPID.settings.Ki = motionb->sbus.sbusCh[RS].scaledVal.value;
-	  motionb->servoB.myPID.settings.Kd = motionb->sbus.sbusCh[S2].scaledVal.value;
-*/
-	  pidCalc(&(motionb->servoA.myPID));
-	  pidCalc(&(motionb->servoB.myPID));
 
-	  if((motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.value >= 500) &&
-	     (motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.value <= 1000))
-	  	  {
-		  	  set_MOTOR_spd(&motionb->servoA.pwmch, motionb->servoA.myPID.opVariables.ControlVariable.ScaledOutput.value);
-		  	  set_MOTOR_spd(&motionb->servoB.pwmch, motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.value);
-	  	  }
-
-	  if (!SH_B || motionb->sbus.sbusHealth.sbusTimeOut)
-	  {
-		  //motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
-		  //motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled = 0;
-		  //motionb->sbus.sbusCh[S2].scaledVal.calculationEnabled = 0;
-		  servoStop(&motionb->servoA);
-		  servoStop(&motionb->servoB);
-		  motionb->taut_state = MC_WF_RELEASE;
-	  }
-
+  case MC_OP_MODE_MANUAL:
+	  opManualCycl(motionb);
+	  if (!SC_A || motionb->sbus.sbusHealth.sbusTimeOut)
+		  motionb->taut_state = MC_WF_SUBMODULES;
 	  break;
+
+  case MC_OP_MODE_SEMI:
+	  opSemiCycl(motionb);
+	  if (!SC_B || motionb->sbus.sbusHealth.sbusTimeOut)
+		  motionb->taut_state = MC_WF_SUBMODULES;
+	  break;
+
+  case MC_OP_MODE_AUT:
+	  opAutCycl(motionb);
+	  if (!SC_C || motionb->sbus.sbusHealth.sbusTimeOut)
+		  motionb->taut_state = MC_WF_SUBMODULES;
+	  break;
+
+
 
   } //switch
   setTimer(&motionTimer_1);
@@ -227,8 +105,8 @@ pidInpuVarInit(motiont *motionb)
 {
 	  motionb->sbus.sbusCh[LS].rawVal.min = 165;
 	  motionb->sbus.sbusCh[LS].rawVal.max = 1799;
-	  motionb->sbus.sbusCh[LS].scaledVal.min = 0;
-	  motionb->sbus.sbusCh[LS].scaledVal.max = PROP_LS_MAX;
+	  motionb->sbus.sbusCh[LS].scaledVal.min = 165;
+	  motionb->sbus.sbusCh[LS].scaledVal.max = 1799;//PROP_LS_MAX;
 	  motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 1;
 	  refreshSbusCh(&(motionb->sbus.sbusCh[LS]));
 
@@ -247,8 +125,8 @@ pidInpuVarInit(motiont *motionb)
 	  refreshSbusCh(&(motionb->sbus.sbusCh[S2]));
 	  /* **** SERVO A **** */
 	  motionb->servoA.myPID.Inputs.SetPoint.RawInput.value = 57;
-	  motionb->servoA.myPID.Inputs.SetPoint.RawInput.max = 1808;
-	  motionb->servoA.myPID.Inputs.SetPoint.RawInput.min = -1808;
+	  motionb->servoA.myPID.Inputs.SetPoint.RawInput.max = 1799;
+	  motionb->servoA.myPID.Inputs.SetPoint.RawInput.min = 165;
 	  motionb->servoA.myPID.Inputs.SetPoint.ScaledOutput.max = 3616;
 	  motionb->servoA.myPID.Inputs.SetPoint.ScaledOutput.min = 0;
 
@@ -264,9 +142,9 @@ pidInpuVarInit(motiont *motionb)
 
 	  /* **** SERVO B **** */
 
-	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.value = 57;
-	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.max = 1808;
-	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.min = -1808;
+	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.value = 1;
+	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.max = 1799;
+	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.min = 165;
 	  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.max = 3616;
 	  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.min = 0;
 
@@ -280,6 +158,7 @@ pidInpuVarInit(motiont *motionb)
 	  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.max = 1000;
 	  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.min = 500;
 
+
 }
 
 motionInit(motiont *motionBlock)
@@ -288,8 +167,8 @@ motionInit(motiont *motionBlock)
 
 
 
-	 servoFB_init(&(motionBlock->servoA));
-	 servoFB_init(&(motionBlock->servoB));
+	 servoInit(&(motionBlock->servoA));
+	 servoInit(&(motionBlock->servoB));
 	 servoNE_init(&(motionBlock->servoC));
 	 servoNE_init(&(motionBlock->servoD));
 
@@ -307,27 +186,3 @@ motionInit(motiont *motionBlock)
 
 
 uint8_t mt_aut_state;
-/*
-myTimerType motionTestTimer;
-
-motionTestStop(struct servoFBth *servoFB)
-{
-	servoStop(servoFB);
-}
-
-motionTest(motiont *motionBlock)
-{
-	motionTestTimer.set_value = 4000;
-	motionTestTimer.Callback = motionTestStop;
-	motionTestTimer.ownerPtr = &motionBlock->servoA;
-	setTimer(&motionTestTimer);
-	initTimer(&motionTestTimer);
-
-	//uint8_t mt_start_signal =HAL_GPIO_ReadPin(VA_HATUL_GPIO_Port, VA_HATUL_Pin);
-	servoStartCW(&(motionBlock->servoA));
-	//setTimer(&motionTestStop);
-
-}
-*/
-
-

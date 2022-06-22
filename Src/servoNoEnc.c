@@ -4,9 +4,9 @@
  *  Created on: 2022. márc. 25.
  *      Author: nemet
  */
-#include "encoder.h"
 #include "ServoNoEnc.h"
 #include "sbus_fnc.h"
+//#include "encoderMFP.h"
 
 #define NO_SERVOS_NE 2  				 	//servo array -hez
 servoNet *servones[NO_SERVOS_NE+1]; 	    //servo array -hez

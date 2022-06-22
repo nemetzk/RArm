@@ -38,7 +38,7 @@ typedef struct pidOpVarsth
 	int32_t Integral;
 	int32_t Derivative;
 	scaledNumt ControlVariable; //ez az output skálázatlanul
-
+	uint8_t justStartedFlg;
 }pidOpVarst;
 
 typedef struct pidInputsth

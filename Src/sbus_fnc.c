@@ -7,8 +7,8 @@
 
 #include "sbus_fnc.h"
 #include <stdint.h>
-#include "header.h"
 #include "timerFunctions.h"
+//#include "../../old/header.h"
 
 void sbusCommTimeOver(struct sbusth *hsbus)
 {
@@ -25,7 +25,7 @@ void SBUS_init(struct sbusth *hsbus)
 
 	HAL_UART_Receive_IT(hsbus->sbusUart, &(hsbus->func.oneCharBuffer), 1);
 
-	hsbus->func.sbusTimer.set_value = 100;
+	hsbus->func.sbusTimer.set_value = 200;
 	hsbus->func.sbusTimer.Callback = sbusCommTimeOver;
 	hsbus->func.sbusTimer.ownerPtr = hsbus;
 
@@ -138,36 +138,6 @@ void parseSbusMessage(struct sbusth *hsbus, uint8_t *sbus_msg_bytes)
 			                           ((uint16_t)0x04));
 	hsbus->sbusHealth. failsafeActivated = (((uint16_t)sbus_msg_bytes[23]) &
 			                           ((uint16_t)0x08));
-/*
-	for (i=0;i<17;i++)
-		{
-
-			if (hsbus->sbusCh[i].digVal.calculationEnabled)
-			{
-				if (hsbus->sbusCh[i].rawVal.value <hsbus->sbusCh[i].digVal.Aval)
-					hsbus->sbusCh[i].digVal.A = 1;
-				else
-					hsbus->sbusCh[i].digVal.A = 0;
-
-				if ((hsbus->sbusCh[i].rawVal.value >= hsbus->sbusCh[i].digVal.Aval) && (hsbus->sbusCh[i].rawVal.value < hsbus->sbusCh[i].digVal.Bval))
-					hsbus->sbusCh[i].digVal.B= 1;
-				else
-					hsbus->sbusCh[i].digVal.B = 0;
-
-				if (hsbus->sbusCh[i].rawVal.value >=hsbus->sbusCh[i].digVal.Bval )
-					hsbus->sbusCh[i].digVal.C= 1;
-				else
-					hsbus->sbusCh[i].digVal.C = 0;
-			}
-
-			if (hsbus->sbusCh[i].scaledVal.calculationEnabled&&((hsbus->sbusCh[i].rawVal.max - hsbus->sbusCh[i].rawVal.min)>0))
-			{
-				szamlalo 	= (hsbus->sbusCh[i].rawVal.value- hsbus->sbusCh[i].rawVal.min)*( hsbus->sbusCh[i].scaledVal.max - hsbus->sbusCh[i].scaledVal.min);
-				nevezo 		= hsbus->sbusCh[i].rawVal.max - hsbus->sbusCh[i].rawVal.min;
-				hsbus->sbusCh[i].scaledVal.value = (int16_t)(szamlalo/nevezo) + hsbus->sbusCh[i].scaledVal.min;
-
-			}
-*/
 
 	hsbus->sbusHealth.sbusTimeOut = 0;
 }

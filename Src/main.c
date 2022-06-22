@@ -78,20 +78,20 @@ void motion_init (struct motionth *motionb)
 {
 /* **********		SBUS  ********** */
 	motionb->sbus.sbusUart = &huart1;
-	/* **********		SERVO A - ENCODER  TYPE ********** */
+/* **********		SERVO A - ENCODER  TYPE ********** */
 	motionb->servoA.encTim 	= &htim1;
 	motionb->servoA.pwmTim 	= &htim3;
 	motionb->servoA.pwmCh 	= TIM_CHANNEL_1;
-	/* **********		SERVO B - ENCODER  TYPE ********** */
+/* **********		SERVO B - ENCODER  TYPE ********** */
 	motionb->servoB.encTim 	= &htim2;
 	motionb->servoB.pwmTim 	= &htim3;
 	motionb->servoB.pwmCh 	= TIM_CHANNEL_2;
-	/* **********		SERVO C - RC COPY MODE ********** */
+/* **********		SERVO C - RC COPY MODE ********** */
 	motionb->servoC.opMode = SNE_OPMODE_COPY;
 	motionb->servoC.pwmTim = &htim3;
 	motionb->servoC.pwmCh = TIM_CHANNEL_3;
 	motionb->servoC.inputRcCH = &(motionb->sbus.sbusCh[RS]);
-	/* **********		SERVO D - JOG MODE ********** */
+/* **********		SERVO D - JOG MODE ********** */
 	motionb->servoD.opMode = SNE_OPMODE_JOGMODE;
 	motionb->servoD.pwmTim = &htim3;
 	motionb->servoD.pwmCh = TIM_CHANNEL_4;
@@ -103,9 +103,9 @@ void motion_init (struct motionth *motionb)
 	motionb->servoD.limitSwitch.Conf.isCWReversed = 0;
 	motionb->servoD.limitSwitch.Conf.isCCWReversed = 0;
 	motionb->servoD.limitSwitch.Conf.LSSignalsrEnabled=1;
-	/* **********		MOTION BLOCK INIT CALL ********** */
+/* **********		MOTION BLOCK INIT CALL ********** */
 	motionInit(motionb);
-	/* **********		RC TRANSMITTER CHANNEL CONFIG 1 ********** */
+/* **********		RC TRANSMITTER CHANNEL CONFIG 1 ********** */
 
 	motionb->sbus.sbusCh[SD].digVal.calculationEnabled=1;
 	motionb->sbus.sbusCh[SC].digVal.calculationEnabled=1;
