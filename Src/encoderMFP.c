@@ -17,10 +17,8 @@ uint8_t noEncoders = 0;
 
 void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas fv-t
 {
-
 	switch (hencoder->state)
 	{
-
 	case EA_INIT:
 		hencoder->speed = 0;
 		hencoder->preReadval = ENCODER_ZERO_VAL;
@@ -37,9 +35,6 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 			hencoder->preReadval = hencoder->readVal;
 			hencoder->state = EA_WORKING;
 		}
-
-
-
 	break;
 
 	case EA_WORKING: //NYUGALMI ÁLLAPOTBAN IDŐ UTÁN NINCS ÚJABB IMPULZUS
@@ -50,7 +45,6 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 			calculateReversedValue(hencoder);
 			if (++(hencoder->count_100ms) >= 10) //100ms-letelt
 			{
-
 				hencoder->diff_100ms =hencoder->val - hencoder->preval_100ms;
 				hencoder->preval_100ms = hencoder->val;
 				averageCalcCycl(&hencoder->encAVG, hencoder->diff_100ms);
@@ -59,6 +53,13 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 			}
 			hencoder->preReadval = hencoder->readVal;
 			//setTimer(&(hencoder->encoderTim));
+		}
+		else
+		{
+			hencoder->diff_100ms =0;
+			hencoder->preval_100ms = 0;
+			hencoder->speed = 0;
+
 		}
 	break;
 

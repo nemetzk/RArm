@@ -73,14 +73,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	{
 		//TimerProgramCyclic(htim);
 		//HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
-	}
 
+	}
+	TimerProgramCyclic(htim);
+	/*
 	if(htim->Instance == TIM4) //1ms
 	{
-		TimerProgramCyclic(htim);
-		HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
-	}
 
+	}
+*/
 }
 
 

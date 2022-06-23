@@ -32,9 +32,6 @@ typedef struct Encoderh{
 	int32_t val;
 	int32_t readVal;
 	int32_t preReadval;
-	int32_t pre_val;
-	int32_t spd_preval;
-
 	int32_t diff_10ms;
 	int32_t diff_100ms;
 	int32_t preval_100ms;

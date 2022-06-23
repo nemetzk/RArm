@@ -28,7 +28,6 @@ uint8_t servoGoPid(struct servoFBth *servo,int32_t dist)
 	  servo->myPID.Inputs.ProcessVariable.RawInput.value = servo->encoder.val;
 	  servo->myPID.Inputs.SetPoint.RawInput.value = dist;
 	  pidCalc(&(servo->myPID));
-
 	  if((servo->myPID.opVariables.ControlVariable.ScaledOutput.value >= 500) &&
 	     (servo->myPID.opVariables.ControlVariable.ScaledOutput.value <= 1000))
 	  	  {
@@ -44,6 +43,24 @@ uint8_t servoGoPid(struct servoFBth *servo,int32_t dist)
 	  }*/
 	  return result;
 }
+
+void cpyAxis(struct servoFBth *servo_to,struct servoFBth *servo_from,int32_t dir)
+{
+	int16_t spd_from;
+	int16_t spd_to;
+	spd_from = servo_from->myPID.opVariables.ControlVariable.ScaledOutput.value;
+	if (dir == 1)
+	{
+		spd_to = spd_from;
+	}
+	else if (dir == -1)
+	{
+		spd_to = spd_from - 2*(spd_from-750);
+	}
+	set_MOTOR_spd(&servo_to->pwmch, spd_to);
+}
+
+
 void servoCycle_Callback(void)
 {
 	uint8_t eidx = 0;

@@ -45,10 +45,14 @@ void opManualCycl(struct motionth *motionb)
 			}
 		break;
 		case OPM_IN_PROGRESS_2:
+			servoGoPid(&motionb->servoB, motionb->sbus.sbusCh[LS].scaledVal.value);
 			if (SH_A || motionb->sbus.sbusHealth.sbusTimeOut) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
+				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
 				motionb->opManu.state = OPM_WF_RELEASE_SH;
+				servoStop(&motionb->servoA);
 			}
+
 		break;
 		case OPM_IN_PROGRESS_3:
 			if (SH_A || motionb->sbus.sbusHealth.sbusTimeOut) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
