@@ -25,7 +25,7 @@ typedef struct motionth
 	struct sbusth sbus;
 	struct servoFBth servoA;
 	struct servoFBth servoB;
-	struct servoNeth servoC;
+	struct servoFBth servoC;
 	struct servoNeth servoD;
 	struct subCycleth opManu;
 	struct subCycleth opSemi;

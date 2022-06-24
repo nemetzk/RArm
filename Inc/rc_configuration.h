@@ -29,4 +29,7 @@
 #define RS_VAL motionb->sbus.sbusCh[RS].scaledVal.value
 #define S2_VAL motionb->sbus.sbusCh[S2].scaledVal.value
 
+#define SBUS_ERROR 			motionb->sbus.sbusHealth.sbusTimeOut
+#define REFRESH_SBUS_AN 	refreshSbusAnChs(&motionb->sbus)
+
 #endif /* INC_RC_CONFIGURATION_H_ */

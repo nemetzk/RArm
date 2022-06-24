@@ -46,11 +46,11 @@ void motion_cycle(struct motionth *motionb)
   {
   case MC_WF_SERVO_RDY:
   	  if ((motionb->servoA.sInitState == S_INIT_DONE))
-
   		if ((motionb->servoB.sInitState == S_INIT_DONE))
-  	  {
-  		motionb->taut_state = MC_WF_SUBMODULES;
-  	  }
+ 			if ((motionb->servoC.sInitState == S_INIT_DONE))
+  			{
+  				motionb->taut_state = MC_WF_SUBMODULES;
+  			}
   break;
 
   case MC_WF_SUBMODULES:
@@ -158,6 +158,24 @@ pidInpuVarInit(motiont *motionb)
 	  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.max = 1000;
 	  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.min = 500;
 
+	  /* **** SERVO C **** */
+
+	  motionb->servoC.myPID.Inputs.SetPoint.RawInput.value = 1;
+	  motionb->servoC.myPID.Inputs.SetPoint.RawInput.max = 1799;
+	  motionb->servoC.myPID.Inputs.SetPoint.RawInput.min = 165;
+	  motionb->servoC.myPID.Inputs.SetPoint.ScaledOutput.max = 3616;
+	  motionb->servoC.myPID.Inputs.SetPoint.ScaledOutput.min = 0;
+
+	  motionb->servoC.myPID.Inputs.ProcessVariable.RawInput.max = 65534;
+	  motionb->servoC.myPID.Inputs.ProcessVariable.RawInput.min = 0;
+	  motionb->servoC.myPID.Inputs.ProcessVariable.ScaledOutput.max = 3616;
+	  motionb->servoC.myPID.Inputs.ProcessVariable.ScaledOutput.min = 0;
+
+	  motionb->servoC.myPID.opVariables.ControlVariable.RawInput.max = CONTROL_VAR_MAX;
+	  motionb->servoC.myPID.opVariables.ControlVariable.RawInput.min = CONTROL_VAR_MIN;
+	  motionb->servoC.myPID.opVariables.ControlVariable.ScaledOutput.max = 1000;
+	  motionb->servoC.myPID.opVariables.ControlVariable.ScaledOutput.min = 500;
+
 
 }
 
@@ -169,12 +187,13 @@ motionInit(motiont *motionBlock)
 
 	 servoInit(&(motionBlock->servoA));
 	 servoInit(&(motionBlock->servoB));
-	 servoNE_init(&(motionBlock->servoC));
+	 servoInit(&(motionBlock->servoC));
 	 servoNE_init(&(motionBlock->servoD));
 
 	 pidInpuVarInit(motionBlock);
 	 pidInitStartup(&(motionBlock->servoA.myPID));
 	 pidInitStartup(&(motionBlock->servoB.myPID));
+	 pidInitStartup(&(motionBlock->servoC.myPID));
 
 	//HAL_TIM_Encoder_Start_IT(motionBlock->encTim2, TIM_CHANNEL_ALL);
 	motionTimer_1.set_value = PID_CYCLE_INTERVAL;

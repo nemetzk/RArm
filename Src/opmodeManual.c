@@ -6,58 +6,61 @@
  */
 #include "stm32f4xx_hal.h"
 #include "motion.h"
-
 #include "opmodeManual.h"
+#include "servo_definitions.h"
+
+#define OPSEMI_MAN motionb->opManu.state
 
 void opManualCycl(struct motionth *motionb)
 {
-	switch (motionb->opManu.state)
+	switch (OPSEMI_MAN)
 	{
 		case OPM_INIT:
-			motionb->opManu.state = OPM_WF_RELEASE_SH;
+			OPSEMI_MAN = OPM_WF_RELEASE_SH;
 		break;
 		case OPM_WF_RELEASE_SH:
 			if (SH_A)
-				motionb->opManu.state = OPM_WF_IDLE;
+				OPSEMI_MAN = OPM_WF_IDLE;
 			break;
 		case OPM_WF_IDLE:
-			refreshSbusAnChs(&motionb->sbus);
+			REFRESH_SBUS_AN;
 			if (SD_A && SH_B)
 			{
-				motionb->opManu.state = OPM_IN_PROGRESS_1;
+				OPSEMI_MAN = OPM_IN_PROGRESS_1;
 			}
 			if (SD_B && SH_B)
 			{
-				motionb->opManu.state = OPM_IN_PROGRESS_2;
+				OPSEMI_MAN = OPM_IN_PROGRESS_2;
 			}
 			if (SD_C && SH_B)
 			{
-				motionb->opManu.state = OPM_IN_PROGRESS_3;
+				OPSEMI_MAN = OPM_IN_PROGRESS_3;
 			}
 			break;
 		case OPM_IN_PROGRESS_1:
-			servoGoPid(&motionb->servoA, motionb->sbus.sbusCh[LS].scaledVal.value);
-			if (SH_A || motionb->sbus.sbusHealth.sbusTimeOut) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
+			servoGoPid(SERVOA, LS_VAL);
+			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
-				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
-				motionb->opManu.state = OPM_WF_RELEASE_SH;
-				servoStop(&motionb->servoA);
+				OPSEMI_MAN = OPM_WF_RELEASE_SH;
+				servoStop(SERVOA);
 			}
 		break;
 		case OPM_IN_PROGRESS_2:
-			servoGoPid(&motionb->servoB, motionb->sbus.sbusCh[LS].scaledVal.value);
-			if (SH_A || motionb->sbus.sbusHealth.sbusTimeOut) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
+			servoGoPid(SERVOB, LS_VAL);
+			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
-				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
-				motionb->opManu.state = OPM_WF_RELEASE_SH;
-				servoStop(&motionb->servoA);
+				OPSEMI_MAN = OPM_WF_RELEASE_SH;
+				servoStop(SERVOA);
 			}
 
 		break;
 		case OPM_IN_PROGRESS_3:
-			if (SH_A || motionb->sbus.sbusHealth.sbusTimeOut) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
+			//servoGoPid(SERVOC, LS_VAL);
+			servoGoForTime(SERVOC, 500, 850);
+			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
-				motionb->opManu.state = OPM_WF_RELEASE_SH;
+				OPSEMI_MAN = OPM_WF_RELEASE_SH;
+				servoStop(SERVOC);
 			}
 		break;
 

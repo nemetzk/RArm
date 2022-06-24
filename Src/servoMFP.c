@@ -9,7 +9,7 @@
 #include "ServoMFP.h"
 
 myTimerType motionTimeoutTimer;
-
+uint8_t sidx = 1;
 #define NO_SERVOS 3  				 	//servo array -hez
 servoFBt *servos[NO_SERVOS]; 	    //servo array -hez
 uint8_t noServos = 0;
@@ -63,7 +63,22 @@ void cpyAxis(struct servoFBth *servo_to,struct servoFBth *servo_from,int32_t dir
 
 void servoCycle_Callback(void)
 {
-	uint8_t eidx = 0;
+	if (!(servos[sidx]->sInitState ==S_INIT_DONE))
+		{
+			ServoInitProcess(servos[sidx]);
+		}
+	else if ((servos[sidx]->sInitState ==S_INIT_DONE))
+		{
+			sidx++;
+		}
+
+	if (!(sidx = noServos && servos[sidx]->sInitState ==S_INIT_DONE))
+		{
+			setTimer(&servos[1]->servoCycleTim);
+		}
+}
+
+/* deactivated at: 220624
 	if (!(servos[1]->sInitState ==S_INIT_DONE))
 		{
 			ServoInitProcess(servos[1]);
@@ -76,7 +91,9 @@ void servoCycle_Callback(void)
 			}
 	if(!((servos[1]->sInitState ==S_INIT_DONE)  && (servos[2]->sInitState ==S_INIT_DONE)))
 		setTimer(&servos[1]->servoCycleTim);
-}
+*/
+
+
 
 servoInit(struct servoFBth *hservoFB)
 {

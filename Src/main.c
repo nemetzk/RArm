@@ -87,14 +87,13 @@ void motion_init (struct motionth *motionb)
 	motionb->servoB.pwmTim 	= &htim3;
 	motionb->servoB.pwmCh 	= TIM_CHANNEL_2;
 /* **********		SERVO C - RC COPY MODE ********** */
-	motionb->servoC.opMode = SNE_OPMODE_COPY;
-	motionb->servoC.pwmTim = &htim3;
-	motionb->servoC.pwmCh = TIM_CHANNEL_3;
-	motionb->servoC.inputRcCH = &(motionb->sbus.sbusCh[RS]);
+	motionb->servoC.encTim 	= &htim4;
+	motionb->servoC.pwmTim 	= &htim3;
+	motionb->servoC.pwmCh 	= TIM_CHANNEL_4;
 /* **********		SERVO D - JOG MODE ********** */
 	motionb->servoD.opMode = SNE_OPMODE_JOGMODE;
 	motionb->servoD.pwmTim = &htim3;
-	motionb->servoD.pwmCh = TIM_CHANNEL_4;
+	motionb->servoD.pwmCh = TIM_CHANNEL_3;
 
 	motionb->servoD.limitSwitch.Conf.GPIO_port_CW = VA_ELOL_GPIO_Port;
 	motionb->servoD.limitSwitch.Conf.GPIO_port_CCW = VA_HATUL_GPIO_Port;
