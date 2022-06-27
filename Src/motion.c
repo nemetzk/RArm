@@ -127,12 +127,12 @@ pidInpuVarInit(motiont *motionb)
 	  motionb->servoA.myPID.Inputs.SetPoint.RawInput.value = 57;
 	  motionb->servoA.myPID.Inputs.SetPoint.RawInput.max = 1799;
 	  motionb->servoA.myPID.Inputs.SetPoint.RawInput.min = 165;
-	  motionb->servoA.myPID.Inputs.SetPoint.ScaledOutput.max = 3616;
-	  motionb->servoA.myPID.Inputs.SetPoint.ScaledOutput.min = 0;
+	  motionb->servoA.myPID.Inputs.SetPoint.ScaledOutput.max = 1900; //mm-re skálázva
+	  motionb->servoA.myPID.Inputs.SetPoint.ScaledOutput.min = 1700;
 
 	  motionb->servoA.myPID.Inputs.ProcessVariable.RawInput.max = 65534;
 	  motionb->servoA.myPID.Inputs.ProcessVariable.RawInput.min = 0;
-	  motionb->servoA.myPID.Inputs.ProcessVariable.ScaledOutput.max = 3616;
+	  motionb->servoA.myPID.Inputs.ProcessVariable.ScaledOutput.max = 3616; //mm-re skálázva
 	  motionb->servoA.myPID.Inputs.ProcessVariable.ScaledOutput.min = 0;
 
 	  motionb->servoA.myPID.opVariables.ControlVariable.RawInput.max = CONTROL_VAR_MAX;
@@ -145,12 +145,12 @@ pidInpuVarInit(motiont *motionb)
 	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.value = 1;
 	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.max = 1799;
 	  motionb->servoB.myPID.Inputs.SetPoint.RawInput.min = 165;
-	  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.max = 3616;
-	  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.min = 0;
+	  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.max = 1900; //mm-re skálázva
+	  motionb->servoB.myPID.Inputs.SetPoint.ScaledOutput.min = 1700;
 
 	  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.max = 65534;
 	  motionb->servoB.myPID.Inputs.ProcessVariable.RawInput.min = 0;
-	  motionb->servoB.myPID.Inputs.ProcessVariable.ScaledOutput.max = 3616;
+	  motionb->servoB.myPID.Inputs.ProcessVariable.ScaledOutput.max = 3616; //mm-re skálázva
 	  motionb->servoB.myPID.Inputs.ProcessVariable.ScaledOutput.min = 0;
 
 	  motionb->servoB.myPID.opVariables.ControlVariable.RawInput.max = CONTROL_VAR_MAX;
@@ -163,12 +163,12 @@ pidInpuVarInit(motiont *motionb)
 	  motionb->servoC.myPID.Inputs.SetPoint.RawInput.value = 1;
 	  motionb->servoC.myPID.Inputs.SetPoint.RawInput.max = 1799;
 	  motionb->servoC.myPID.Inputs.SetPoint.RawInput.min = 165;
-	  motionb->servoC.myPID.Inputs.SetPoint.ScaledOutput.max = 3616;
-	  motionb->servoC.myPID.Inputs.SetPoint.ScaledOutput.min = 0;
+	  motionb->servoC.myPID.Inputs.SetPoint.ScaledOutput.max = 1900; //mm-re skálázva
+	  motionb->servoC.myPID.Inputs.SetPoint.ScaledOutput.min = 1700;
 
 	  motionb->servoC.myPID.Inputs.ProcessVariable.RawInput.max = 65534;
 	  motionb->servoC.myPID.Inputs.ProcessVariable.RawInput.min = 0;
-	  motionb->servoC.myPID.Inputs.ProcessVariable.ScaledOutput.max = 3616;
+	  motionb->servoC.myPID.Inputs.ProcessVariable.ScaledOutput.max = 3616; //mm-re skálázva
 	  motionb->servoC.myPID.Inputs.ProcessVariable.ScaledOutput.min = 0;
 
 	  motionb->servoC.myPID.opVariables.ControlVariable.RawInput.max = CONTROL_VAR_MAX;

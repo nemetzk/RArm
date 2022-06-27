@@ -54,12 +54,28 @@ void opSemiCycl(struct motionth *motionb)
 
 		break;
 		case OPS_IN_PROGRESS_2:
+			servoGoPid(SERVOB,LS_VAL);
+			cpyAxis(SERVOC, SERVOB, 1);
 
+			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
+			{
+				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
+				servoStop(SERVOA);
+				servoStop(SERVOB);
+				servoStop(SERVOC);
+				OPSEMI_STATE = OPS_WF_RELEASE_SH;
+			}
 		break;
 
 		case OPS_IN_PROGRESS_3:
+			servoGoPid(SERVOC,LS_VAL);
+
 			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
+				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
+				servoStop(SERVOA);
+				servoStop(SERVOB);
+				servoStop(SERVOC);
 				OPSEMI_STATE = OPS_WF_RELEASE_SH;
 			}
 		break;

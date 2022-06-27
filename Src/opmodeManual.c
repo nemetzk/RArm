@@ -55,8 +55,8 @@ void opManualCycl(struct motionth *motionb)
 
 		break;
 		case OPM_IN_PROGRESS_3:
-			//servoGoPid(SERVOC, LS_VAL);
-			servoGoForTime(SERVOC, 500, 850);
+			servoGoPid(SERVOC, LS_VAL);
+			//servoGoForTime(SERVOC, 500, 850);
 			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
 				OPSEMI_MAN = OPM_WF_RELEASE_SH;

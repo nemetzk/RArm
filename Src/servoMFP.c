@@ -72,7 +72,7 @@ void servoCycle_Callback(void)
 			sidx++;
 		}
 
-	if (!(sidx = noServos && servos[sidx]->sInitState ==S_INIT_DONE))
+	if (!((sidx == noServos) && (servos[sidx]->sInitState == S_INIT_DONE)))
 		{
 			setTimer(&servos[1]->servoCycleTim);
 		}
