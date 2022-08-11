@@ -9,6 +9,7 @@
 #include "main.h"
 #include "pid.h"
 #include "ServoMFP.h"
+#include "servo_definitions.h"
 #include "opmodeManual.h"
 #include "opmodeSemi.h"
 #include "opmodeAut.h"
@@ -19,6 +20,7 @@
 
 
 myTimerType motionTimer_1;
+myTimerType stat_led_timer_1;
 
 #define MC_WF_SERVO_RDY		0
 #define MC_WF_SUBMODULES	1
@@ -39,6 +41,7 @@ myTimerType motionTimer_1;
 #define	TAUT_SG_OP_CHANNEL			8
 
 
+
 void motion_cycle(struct motionth *motionb)
 {
   refreshSbusDigitChs(&motionb->sbus);
@@ -51,6 +54,11 @@ void motion_cycle(struct motionth *motionb)
   			{
   				motionb->taut_state = MC_WF_SUBMODULES;
   			}
+  	  if (stat_led_timer_1.Elapsed)
+  	  {
+  		HAL_GPIO_TogglePin(LED_STAT_1_GPIO_Port, LED_STAT_1_Pin);
+  		setTimer(&stat_led_timer_1);
+  	  }
   break;
 
   case MC_WF_SUBMODULES:
@@ -101,7 +109,7 @@ void motion_cycle(struct motionth *motionb)
   setTimer(&motionTimer_1);
 }
 
-pidInpuVarInit(motiont *motionb)
+void pidInpuVarInit(motiont *motionb)
 {
 	  motionb->sbus.sbusCh[LS].rawVal.min = 165;
 	  motionb->sbus.sbusCh[LS].rawVal.max = 1799;
@@ -179,12 +187,39 @@ pidInpuVarInit(motiont *motionb)
 
 }
 
+uint8_t MSA_state;
+uint8_t MSB_state;
+uint8_t MSC_state;
+
+#define MSA_INIT	0
+#define MSA_PROCESS	1
+
+int8_t moveServoA(motiont *motionb,int32_t position)
+{
+	servoGoPid(SERVOA,position,1);
+	cpyAxis(SERVOB, SERVOA, -1);
+	cpyAxis(SERVOC, SERVOA, 1);
+
+	return !SERVO_A_HAS_SPD;
+
+}
+
+int8_t moveServoB(motiont *motionb,int32_t position)
+{
+	servoGoPid(SERVOB,position,1);
+	cpyAxis(SERVOC, SERVOB, -1);
+	return !SERVO_B_HAS_SPD;
+}
+
+int8_t moveServoC(motiont *motionb,int32_t position)
+{
+	servoGoPid(SERVOC,position,1);
+	return !SERVO_C_HAS_SPD;
+}
+
 motionInit(motiont *motionBlock)
 {
 	 SBUS_init(&motionBlock->sbus);
-
-
-
 	 servoInit(&(motionBlock->servoA));
 	 servoInit(&(motionBlock->servoB));
 	 servoInit(&(motionBlock->servoC));
@@ -201,6 +236,12 @@ motionInit(motiont *motionBlock)
 	motionTimer_1.Callback=	  motion_cycle;
 	initTimer(&motionTimer_1);
 	setTimer(&motionTimer_1);
+
+	stat_led_timer_1.set_value = STAT_LED_1_BLINK_NOENC_INTERVAL;
+	stat_led_timer_1.ownerPtr = motionBlock;
+	stat_led_timer_1.Callback = NULL;
+	initTimer(&stat_led_timer_1);
+	setTimer(&stat_led_timer_1);
 }
 
 

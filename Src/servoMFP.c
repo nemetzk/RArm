@@ -22,9 +22,10 @@ void encoderTimEA(struct servoFBth *hservoFB) //amikor megáll a mozgás ez az i
 }
 */
 
-uint8_t servoGoPid(struct servoFBth *servo,int32_t dist)
+uint8_t servoGoPid(struct servoFBth *servo,int32_t dist, uint8_t dir)
 {
 	  uint8_t result;
+
 	  servo->myPID.Inputs.ProcessVariable.RawInput.value = servo->encoder.val;
 	  servo->myPID.Inputs.SetPoint.RawInput.value = dist;
 	  pidCalc(&(servo->myPID));

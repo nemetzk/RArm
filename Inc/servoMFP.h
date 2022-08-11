@@ -78,7 +78,7 @@ void servoGoForTimeInit(struct servoFBth *servoFB);
 void servoGoForTime(struct servoFBth *servoFB,uint16_t setTime, int16_t motorSpeed);
 void servoPidCycl(struct servoFBth *servoFB);
 void ServoStatusCycl(struct servoFBth *servoFB);
-uint8_t servoGoPid(struct servoFBth *servo,int32_t dist);
+uint8_t servoGoPid(struct servoFBth *servo,int32_t dist, uint8_t dir);
 void cpyAxis(struct servoFBth *servo_to,struct servoFBth *servo_from,int32_t dir);
 
 #endif /* INC_SERVOMFP_H_ */

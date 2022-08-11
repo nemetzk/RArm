@@ -33,6 +33,7 @@ void initCalcScaling(struct scaledNumth *sg)
 
 void calcScaledVal(struct scaledNumth *sg)
 {
+
 		sg->ScaledOutput.value = (int32_t)(((double)sg->RawInput.value - (double)sg->RawInput.min) * (double)sg->helpers.tenyezo + (double)sg->ScaledOutput.min);
 }
 

@@ -40,10 +40,8 @@ void opSemiCycl(struct motionth *motionb)
 			}
 			break;
 		case OPS_IN_PROGRESS_1:
-			servoGoPid(SERVOA,LS_VAL);
-			cpyAxis(SERVOB, SERVOA, -1);
-			cpyAxis(SERVOC, SERVOA, 1);
-			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
+
+			if (moveServoA(motionb, LS_VAL) || SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
 				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
 				servoStop(SERVOA);
@@ -54,10 +52,7 @@ void opSemiCycl(struct motionth *motionb)
 
 		break;
 		case OPS_IN_PROGRESS_2:
-			servoGoPid(SERVOB,LS_VAL);
-			cpyAxis(SERVOC, SERVOB, 1);
-
-			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
+			if (moveServoB(motionb, LS_VAL) || SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
 				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
 				servoStop(SERVOA);
@@ -68,9 +63,7 @@ void opSemiCycl(struct motionth *motionb)
 		break;
 
 		case OPS_IN_PROGRESS_3:
-			servoGoPid(SERVOC,LS_VAL);
-
-			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
+			if (moveServoC(motionb, LS_VAL) || SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
 				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
 				servoStop(SERVOA);

@@ -14,6 +14,8 @@
 #include "rc_configuration.h"
 #include "ServoMFP.h"
 
+#define STAT_LED_1_BLINK_NOENC_INTERVAL 50
+
 typedef struct subCycleth
 {
 	uint8_t state;
@@ -41,6 +43,9 @@ typedef struct motionth
 	uint32_t *pwmCh3;
 }motiont;
 
+int8_t moveServoA(motiont *motionb,int32_t position);
+int8_t moveServoB(motiont *motionb,int32_t position);
+int8_t moveServoC(motiont *motionb,int32_t position);
 
 /*
  *
