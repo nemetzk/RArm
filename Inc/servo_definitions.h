@@ -15,7 +15,7 @@
 
 #define SERVO_A_SPD 	motionb->servoA.encoder.diff_10ms;
 #define SERVO_B_SPD 	motionb->servoB.encoder.diff_10ms;
-#define SERVO_C_SPD 	motionb->servoC.encoder.diff_100ms;
+#define SERVO_C_SPD 	motionb->servoC.encoder.diff_10ms;
 
 #define ENCODER_SPD_MIN	1
 
