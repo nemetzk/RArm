@@ -15,6 +15,15 @@
 #include "ServoMFP.h"
 
 #define STAT_LED_1_BLINK_NOENC_INTERVAL 50
+#define ALLOWABLE_INIT_TIME 5000
+#define LED_CYCL_TIME_FREQUENCY 200
+
+#define ERR_NOERR			0
+#define ERR_SERVO_A_INIT	11
+#define ERR_SERVO_B_INIT	12
+#define ERR_SERVO_C_INIT	13
+#define ERR_SBUS			20
+
 
 typedef struct subCycleth
 {
@@ -24,6 +33,7 @@ typedef struct subCycleth
 typedef struct motionth
 {
 	uint8_t taut_state;
+	uint8_t error_state;
 	struct sbusth sbus;
 	struct servoFBth servoA;
 	struct servoFBth servoB;
@@ -32,6 +42,9 @@ typedef struct motionth
 	struct subCycleth opManu;
 	struct subCycleth opSemi;
 	struct subCycleth opAut;
+
+	myTimerType initTim;
+	myTimerType ledCyclTim;
 
 	TIM_HandleTypeDef *encTim1;
 	TIM_HandleTypeDef *encTim2;

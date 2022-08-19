@@ -38,7 +38,39 @@ void opSemiCycl(struct motionth *motionb)
 			{
 				OPSEMI_STATE = OPS_IN_PROGRESS_3;
 			}
+
+
+			if (SG_A && SH_B)
+			{
+				motionb->servoD.CWcmd = 1;
+				OPSEMI_STATE = OPS_MOVE_BACKWARD;
+			}
+
+			if (SG_C && SH_B)
+			{
+				motionb->servoD.CCWcmd = 1;
+				OPSEMI_STATE = OPS_MOVE_FORWARD;
+			}
+
 			break;
+
+		case OPS_MOVE_BACKWARD:
+			if (SH_A || SBUS_ERROR||motionb->servoD.servoStatus == SNEHALT)
+			{
+				motionb->servoD.CWcmd = 0;
+				OPSEMI_STATE = OPS_WF_RELEASE_SH;
+			}
+			break;
+
+		case OPS_MOVE_FORWARD:
+			if (SH_A || SBUS_ERROR||motionb->servoD.servoStatus == SNEHALT)
+			{
+				motionb->servoD.CCWcmd = 0;
+				OPSEMI_STATE = OPS_WF_RELEASE_SH;
+			}
+			break;
+
+
 		case OPS_IN_PROGRESS_1:
 			moveServoA(motionb, LS_VAL);
 			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS

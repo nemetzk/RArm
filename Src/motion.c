@@ -41,10 +41,44 @@ myTimerType stat_led_timer_1;
 #define	TAUT_SG_OP_CHANNEL			8
 
 
+void led_cycle(struct motionth *motionb)
+{
+// ************************************
+// ********* servo error **************
+// ************************************
+
+ switch (motionb->error_state)
+ {
+ case ERR_NOERR:
+	 HAL_GPIO_WritePin(LED_STAT_0_GPIO_Port, LED_STAT_0_Pin, GPIO_PIN_SET);
+	 HAL_GPIO_WritePin(LED_STAT_1_GPIO_Port, LED_STAT_1_Pin, GPIO_PIN_RESET);
+	 break;
+ case ERR_SERVO_A_INIT:
+	 HAL_GPIO_TogglePin(LED_STAT_1_GPIO_Port, LED_STAT_1_Pin);
+	 break;
+ case ERR_SERVO_B_INIT:
+	 HAL_GPIO_TogglePin(LED_STAT_1_GPIO_Port, LED_STAT_1_Pin);
+ 	 break;
+ case ERR_SERVO_C_INIT:
+	 HAL_GPIO_TogglePin(LED_STAT_1_GPIO_Port, LED_STAT_1_Pin);
+ 	 break;
+ } //switch
+
+ // ************************************
+ // ********** SBUS error **************
+ // ************************************
+
+ if (motionb->sbus.sbusHealth.sbusTimeOut)
+	 HAL_GPIO_WritePin(LED_STAT_1_GPIO_Port, LED_STAT_1_Pin, GPIO_PIN_SET);
+
+
+ setTimer(&motionb->ledCyclTim);
+}
 
 void motion_cycle(struct motionth *motionb)
 {
   refreshSbusDigitChs(&motionb->sbus);
+
   switch (motionb->taut_state)
   {
   case MC_WF_SERVO_RDY:
@@ -54,11 +88,28 @@ void motion_cycle(struct motionth *motionb)
   			{
   				motionb->taut_state = MC_WF_SUBMODULES;
   			}
-  	  if (stat_led_timer_1.Elapsed)
+  	  // ************************************************
+  	  // Init time elapse check
+  	  // ************************************************
+  	  if (motionb->initTim.Elapsed)
   	  {
-  		HAL_GPIO_TogglePin(LED_STAT_1_GPIO_Port, LED_STAT_1_Pin);
-  		setTimer(&stat_led_timer_1);
+  		if (!(motionb->servoA.sInitState == S_INIT_DONE))
+  		{
+  			motionb->error_state = ERR_SERVO_A_INIT;
+  		}
+
+  		if (!(motionb->servoB.sInitState == S_INIT_DONE))
+  		{
+  			motionb->error_state = ERR_SERVO_B_INIT;
+  		}
+
+  		if (!(motionb->servoC.sInitState == S_INIT_DONE))
+  		{
+  			motionb->error_state = ERR_SERVO_C_INIT;
+  		}
+  		motionb->taut_state = MC_WF_SUBMODULES;
   	  }
+  	 // ************************************************
   break;
 
   case MC_WF_SUBMODULES:
@@ -106,6 +157,7 @@ void motion_cycle(struct motionth *motionb)
 
 
   } //switch
+
   setTimer(&motionTimer_1);
 }
 
@@ -242,6 +294,18 @@ motionInit(motiont *motionBlock)
 	stat_led_timer_1.Callback = NULL;
 	initTimer(&stat_led_timer_1);
 	setTimer(&stat_led_timer_1);
+
+	motionBlock->initTim.set_value = ALLOWABLE_INIT_TIME;
+	motionBlock->initTim.ownerPtr = motionBlock;
+	motionBlock->initTim.Callback = NULL;
+	initTimer(&motionBlock->initTim);
+	setTimer(&motionBlock->initTim);
+
+	motionBlock->ledCyclTim.set_value = LED_CYCL_TIME_FREQUENCY;
+	motionBlock->ledCyclTim.ownerPtr = motionBlock;
+	motionBlock->ledCyclTim.Callback = led_cycle;
+	initTimer(&motionBlock->ledCyclTim);
+	setTimer(&motionBlock->ledCyclTim);
 }
 
 

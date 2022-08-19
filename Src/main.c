@@ -90,6 +90,7 @@ void motion_init (struct motionth *motionb)
 	motionb->servoC.encTim 	= &htim4;
 	motionb->servoC.pwmTim 	= &htim3;
 	motionb->servoC.pwmCh 	= TIM_CHANNEL_4;
+
 /* **********		SERVO D - JOG MODE ********** */
 	motionb->servoD.opMode = SNE_OPMODE_JOGMODE;
 	motionb->servoD.pwmTim = &htim3;
@@ -102,6 +103,7 @@ void motion_init (struct motionth *motionb)
 	motionb->servoD.limitSwitch.Conf.isCWReversed = 0;
 	motionb->servoD.limitSwitch.Conf.isCCWReversed = 0;
 	motionb->servoD.limitSwitch.Conf.LSSignalsrEnabled=1;
+
 /* **********		MOTION BLOCK INIT CALL ********** */
 	motionInit(motionb);
 /* **********		RC TRANSMITTER CHANNEL CONFIG 1 ********** */

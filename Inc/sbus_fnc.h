@@ -76,14 +76,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void parseSbusMessage(struct sbusth *hsbus, uint8_t *sbus_msg_bytes);
 void refreshSbusCh(struct sbusChth *sbusCh);
 
-#define SD 7
+#define SH 9
+#define SD 12
 #define SC 10
 #define SG 11
-#define SH 6
+
 
 #define LS 13
 #define RS 15
-#define S2 9
+#define S2 14
 
 
 #define MAX_NO_SBUSES 2
