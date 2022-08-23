@@ -55,11 +55,11 @@ typedef struct motionth
 	TIM_HandleTypeDef *pwmTim3;
 	uint32_t *pwmCh3;
 }motiont;
-
+/*
 int8_t moveServoA(motiont *motionb,int32_t position);
 int8_t moveServoB(motiont *motionb,int32_t position);
 int8_t moveServoC(motiont *motionb,int32_t position);
-
+*/
 /*
  *
  * before changing the servo routines it was:

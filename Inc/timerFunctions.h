@@ -6,8 +6,6 @@
 
 #define TIMEREK_SZAMA         20
 
-
-
 typedef struct myTimerTypeh
 {
 	uint16_t number;
@@ -20,10 +18,8 @@ typedef struct myTimerTypeh
 
 }myTimerType;
 
-TIM_HandleTypeDef *myhtim;
-
-unsigned int tidx ;
-myTimerType *timer[TIMEREK_SZAMA+1];
+static unsigned int tidx ;
+static myTimerType *timer[TIMEREK_SZAMA+1];
 
 void initTimer(myTimerType *Timer_ptr);
 void TimerProgramCyclic(TIM_HandleTypeDef *htim);

@@ -88,6 +88,6 @@ void refreshSbusCh(struct sbusChth *sbusCh);
 
 
 #define MAX_NO_SBUSES 2
-uint8_t no_sbuses;
-sbust *sbuses[MAX_NO_SBUSES+1];
+static uint8_t no_sbuses;
+static sbust *sbuses[MAX_NO_SBUSES+1];
 

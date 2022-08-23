@@ -3,6 +3,7 @@
 #include "timerFunctions.h"
 
 static unsigned char notimers = 0;
+TIM_HandleTypeDef *myhtim;
 
 void TimerProgramCyclic(TIM_HandleTypeDef *htim)
 {
@@ -50,7 +51,7 @@ unsigned char timerElapsed(myTimerType *Timer_ptr) {
 */
 
 void TimerekSetup(TIM_HandleTypeDef *htim){
-	unsigned char timer_setup_idx;
+//	unsigned char timer_setup_idx;
 	HAL_TIM_Base_Start_IT(htim);
 	myhtim=htim;
 }

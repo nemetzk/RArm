@@ -24,7 +24,7 @@ static uint32_t Period = 65535;
 #define EA_WORKING			 1
 
 
-int32_t debug_absval;
+//int32_t debug_absval;
 
 typedef struct Encoderh{
 	uint8_t number;
