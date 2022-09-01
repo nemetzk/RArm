@@ -13,7 +13,7 @@
 #define INT32MAX 0x7FFFFFFF 	// 2 147 483 647
 #define INT32MIN 0x80000000 	//-2 147 483 646
 
-#define  PID_CYCLE_INTERVAL     10
+#define  PID_CYCLE_INTERVAL     20
 
 #define PROP_LS_MAX				6000
 #define INT_RS_MAX				100

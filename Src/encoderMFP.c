@@ -47,10 +47,16 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 			{
 				hencoder->diff_100ms =hencoder->val - hencoder->preval_100ms;
 				hencoder->preval_100ms = hencoder->val;
-				averageCalcCycl(&hencoder->encAVG, hencoder->diff_100ms);
-				hencoder->speed = hencoder->encAVG.averageVal;
 				hencoder->count_100ms = 0;
+				//averageCalcCycl(&hencoder->encAVG, hencoder->diff_100ms);
 			}
+
+			hencoder->speed = hencoder->diff_10ms;
+			if (abs(hencoder->speed) >= 5)
+				hencoder->isMoving = 0x01;
+			else
+				hencoder->isMoving = 0x00;
+
 			hencoder->preReadval = hencoder->readVal;
 			//setTimer(&(hencoder->encoderTim));
 		}
@@ -59,6 +65,7 @@ void encoderAutomata_cycl(Encoder *hencoder) //Ez váltja fel a korábbi spdMeas
 			hencoder->diff_100ms =0;
 			hencoder->preval_100ms = 0;
 			hencoder->speed = 0;
+			hencoder->isMoving = 0x00;
 
 		}
 	break;

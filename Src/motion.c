@@ -22,12 +22,15 @@
 myTimerType motionTimer_1;
 myTimerType stat_led_timer_1;
 
-#define MC_WF_SERVO_RDY		0
-#define MC_WF_SUBMODULES	1
-#define MC_IDLE				2
-#define MC_OP_MODE_MANUAL	3
-#define MC_OP_MODE_SEMI		4
-#define MC_OP_MODE_AUT		5
+#define MC_WF_SERVOA_RDY	0
+#define MC_WF_SERVOB_RDY	1
+#define MC_WF_SERVOC_RDY	2
+
+#define MC_WF_SUBMODULES	11
+#define MC_IDLE				12
+#define MC_OP_MODE_MANUAL	13
+#define MC_OP_MODE_SEMI		14
+#define MC_OP_MODE_AUT		15
 
 
 #define TAUT_WF_SERVO_RDY			0
@@ -81,35 +84,69 @@ void motion_cycle(struct motionth *motionb)
 
   switch (motionb->taut_state)
   {
-  case MC_WF_SERVO_RDY:
-  	  if ((motionb->servoA.sInitState == S_INIT_DONE))
-  		if ((motionb->servoB.sInitState == S_INIT_DONE))
- 			if ((motionb->servoC.sInitState == S_INIT_DONE))
-  			{
-  				motionb->taut_state = MC_WF_SUBMODULES;
-  			}
-  	  // ************************************************
-  	  // Init time elapse check
-  	  // ************************************************
+  case MC_WF_SERVOA_RDY:
+	  // ******************************
+	  // *      SERVO A INIT SUCCEEDED
+	  // *****************************/
+  	  if (motionb->servoA.sInitState == S_INIT_DONE)
+  	  {
+  		setTimer(&motionb->initTim);
+  		motionb->taut_state = MC_WF_SERVOB_RDY;
+  	  }
+	  // *********************************
+	  //      SERVO A INIT FAILED
+  	  // *********************************
+
   	  if (motionb->initTim.Elapsed)
   	  {
-  		if (!(motionb->servoA.sInitState == S_INIT_DONE))
-  		{
   			motionb->error_state = ERR_SERVO_A_INIT;
-  		}
+  	  		motionb->taut_state = MC_WF_SERVOB_RDY;
+  	  		setTimer(&motionb->initTim);
+	  }
 
-  		if (!(motionb->servoB.sInitState == S_INIT_DONE))
-  		{
+
+  break;
+
+  case MC_WF_SERVOB_RDY:
+	  // ******************************
+	  // *      SERVO B INIT SUCCEEDED
+	  // *****************************/
+  	  if (motionb->servoB.sInitState == S_INIT_DONE)
+  	  {
+  		setTimer(&motionb->initTim);
+  		motionb->taut_state = MC_WF_SERVOC_RDY;
+  	  }
+	  // *********************************
+	  //      SERVO B INIT FAILED
+  	  // *********************************
+
+  	  if (motionb->initTim.Elapsed)
+  	  {
   			motionb->error_state = ERR_SERVO_B_INIT;
-  		}
+  	  		motionb->taut_state = MC_WF_SERVOC_RDY;
+  	  		setTimer(&motionb->initTim);
+	  }
+  break;
 
-  		if (!(motionb->servoC.sInitState == S_INIT_DONE))
-  		{
-  			motionb->error_state = ERR_SERVO_C_INIT;
-  		}
+  case MC_WF_SERVOC_RDY:
+	  // ******************************
+	  // *      SERVO C INIT SUCCEEDED
+	  // *****************************/
+  	  if (motionb->servoC.sInitState == S_INIT_DONE)
+  	  {
+  		setTimer(&motionb->initTim);
   		motionb->taut_state = MC_WF_SUBMODULES;
   	  }
-  	 // ************************************************
+	  // *********************************
+	  //      SERVO C INIT FAILED
+  	  // *********************************
+
+  	  if (motionb->initTim.Elapsed)
+  	  {
+  			motionb->error_state = ERR_SERVO_C_INIT;
+  	  		motionb->taut_state = MC_WF_SUBMODULES;
+  	  		setTimer(&motionb->initTim);
+	  }
   break;
 
   case MC_WF_SUBMODULES:
@@ -171,18 +208,19 @@ void pidInpuVarInit(motiont *motionb)
 	  refreshSbusCh(&(motionb->sbus.sbusCh[LS]));
 
 	  motionb->sbus.sbusCh[RS].rawVal.min = 141;
-	  motionb->sbus.sbusCh[RS].rawVal.max = 1738;
-	  motionb->sbus.sbusCh[RS].scaledVal.min = 0;
-	  motionb->sbus.sbusCh[RS].scaledVal.max = INT_RS_MAX;
+	  motionb->sbus.sbusCh[RS].rawVal.max = 1739;
+	  motionb->sbus.sbusCh[RS].scaledVal.min = 165;
+	  motionb->sbus.sbusCh[RS].scaledVal.max = 1799;
 	  motionb->sbus.sbusCh[RS].scaledVal.calculationEnabled = 1;
 	  refreshSbusCh(&(motionb->sbus.sbusCh[RS]));
 
 	  motionb->sbus.sbusCh[S2].rawVal.min = 37;
 	  motionb->sbus.sbusCh[S2].rawVal.max = 1807;
-	  motionb->sbus.sbusCh[S2].scaledVal.min = 0;
-	  motionb->sbus.sbusCh[S2].scaledVal.max = DERIV_S2_MAX;
+	  motionb->sbus.sbusCh[S2].scaledVal.min = 165;
+	  motionb->sbus.sbusCh[S2].scaledVal.max = 1799;
 	  motionb->sbus.sbusCh[S2].scaledVal.calculationEnabled = 1;
 	  refreshSbusCh(&(motionb->sbus.sbusCh[S2]));
+
 	  /* **** SERVO A **** */
 	  motionb->servoA.myPID.Inputs.SetPoint.RawInput.value = 57;
 	  motionb->servoA.myPID.Inputs.SetPoint.RawInput.max = 1799;
@@ -197,8 +235,8 @@ void pidInpuVarInit(motiont *motionb)
 
 	  motionb->servoA.myPID.opVariables.ControlVariable.RawInput.max = CONTROL_VAR_MAX;
 	  motionb->servoA.myPID.opVariables.ControlVariable.RawInput.min = CONTROL_VAR_MIN;
-	  motionb->servoA.myPID.opVariables.ControlVariable.ScaledOutput.max = 1000;
-	  motionb->servoA.myPID.opVariables.ControlVariable.ScaledOutput.min = 500;
+	  motionb->servoA.myPID.opVariables.ControlVariable.ScaledOutput.max = 900;
+	  motionb->servoA.myPID.opVariables.ControlVariable.ScaledOutput.min = 600;
 
 	  /* **** SERVO B **** */
 
@@ -215,8 +253,8 @@ void pidInpuVarInit(motiont *motionb)
 
 	  motionb->servoB.myPID.opVariables.ControlVariable.RawInput.max = CONTROL_VAR_MAX;
 	  motionb->servoB.myPID.opVariables.ControlVariable.RawInput.min = CONTROL_VAR_MIN;
-	  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.max = 1000;
-	  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.min = 500;
+	  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.max = 900;
+	  motionb->servoB.myPID.opVariables.ControlVariable.ScaledOutput.min = 600;
 
 	  /* **** SERVO C **** */
 
@@ -233,8 +271,8 @@ void pidInpuVarInit(motiont *motionb)
 
 	  motionb->servoC.myPID.opVariables.ControlVariable.RawInput.max = CONTROL_VAR_MAX;
 	  motionb->servoC.myPID.opVariables.ControlVariable.RawInput.min = CONTROL_VAR_MIN;
-	  motionb->servoC.myPID.opVariables.ControlVariable.ScaledOutput.max = 1000;
-	  motionb->servoC.myPID.opVariables.ControlVariable.ScaledOutput.min = 500;
+	  motionb->servoC.myPID.opVariables.ControlVariable.ScaledOutput.max = 900;
+	  motionb->servoC.myPID.opVariables.ControlVariable.ScaledOutput.min = 600;
 
 
 }

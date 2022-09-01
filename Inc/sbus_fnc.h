@@ -40,6 +40,7 @@ typedef struct scaledValTH
 {
 	uint8_t calculationEnabled;
 	uint32_t value;
+	uint32_t invValue;
 	int16_t min;
 	int16_t max;
 

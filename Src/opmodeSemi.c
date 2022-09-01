@@ -28,25 +28,25 @@ void opSemiCycl(struct motionth *motionb)
 			REFRESH_SBUS_AN;
 			if (SD_A && SH_B)
 			{
-				OPSEMI_STATE = OPS_IN_PROGRESS_1;
+				OPSEMI_STATE = OPS_IN_PROGRESS_A1;
 			}
 			if (SD_B && SH_B)
 			{
-				OPSEMI_STATE = OPS_IN_PROGRESS_2;
+				OPSEMI_STATE = OPS_IN_PROGRESS_B1;
 			}
 			if (SD_C && SH_B)
 			{
-				OPSEMI_STATE = OPS_IN_PROGRESS_3;
+				OPSEMI_STATE = OPS_IN_PROGRESS_C1;
 			}
 
 
-			if (SG_A && SH_B)
+			if (SG_C && SH_B)
 			{
 				motionb->servoD.CWcmd = 1;
 				OPSEMI_STATE = OPS_MOVE_BACKWARD;
 			}
 
-			if (SG_C && SH_B)
+			if (SG_A && SH_B)
 			{
 				motionb->servoD.CCWcmd = 1;
 				OPSEMI_STATE = OPS_MOVE_FORWARD;
@@ -70,10 +70,26 @@ void opSemiCycl(struct motionth *motionb)
 			}
 			break;
 
+		case OPS_IN_PROGRESS_A1:
 
-		case OPS_IN_PROGRESS_1:
 			moveServoA(motionb, LS_VAL);
+			if (motionb->servoA.encoder.isMoving)
+			{
+				OPSEMI_STATE = OPS_IN_PROGRESS_A2;
+			}
+
 			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
+			{
+				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
+				servoStop(SERVOA);
+				servoStop(SERVOB);
+				servoStop(SERVOC);
+				OPSEMI_STATE = OPS_WF_RELEASE_SH;
+			}
+		break;
+		case OPS_IN_PROGRESS_A2:
+			moveServoA(motionb, LS_VAL);
+			if (SH_A || SBUS_ERROR || !(motionb->servoA.encoder.isMoving)) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
 				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
 				servoStop(SERVOA);
@@ -83,8 +99,15 @@ void opSemiCycl(struct motionth *motionb)
 			}
 
 		break;
-		case OPS_IN_PROGRESS_2:
-			moveServoB(motionb, LS_VAL);
+
+		case OPS_IN_PROGRESS_B1:
+			moveServoB(motionb, RS_VAL_INV);
+
+			if (motionb->servoB.encoder.isMoving)
+			{
+				OPSEMI_STATE = OPS_IN_PROGRESS_B2;
+			}
+
 			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
 				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
@@ -95,8 +118,28 @@ void opSemiCycl(struct motionth *motionb)
 			}
 		break;
 
-		case OPS_IN_PROGRESS_3:
-			moveServoC(motionb, LS_VAL);
+		case OPS_IN_PROGRESS_B2:
+			//moveServoA(motionb, LS_VAL);
+			moveServoB(motionb, RS_VAL_INV);
+
+			if (SH_A || SBUS_ERROR || !(motionb->servoB.encoder.isMoving)) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
+			{
+				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
+				servoStop(SERVOA);
+				servoStop(SERVOB);
+				servoStop(SERVOC);
+				OPSEMI_STATE = OPS_WF_RELEASE_SH;
+			}
+		break;
+
+		case OPS_IN_PROGRESS_C1:
+			moveServoC(motionb, S2_VAL);
+
+			if (motionb->servoC.encoder.isMoving)
+			{
+				OPSEMI_STATE = OPS_IN_PROGRESS_C2;
+			}
+
 			if (SH_A || SBUS_ERROR) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
 			{
 				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
@@ -106,6 +149,23 @@ void opSemiCycl(struct motionth *motionb)
 				OPSEMI_STATE = OPS_WF_RELEASE_SH;
 			}
 		break;
+
+		case OPS_IN_PROGRESS_C2:
+			//moveServoA(motionb, LS_VAL);
+			//moveServoB(motionb, RS_VAL_INV);
+			moveServoC(motionb, S2_VAL);
+
+			if (SH_A || SBUS_ERROR || !(motionb->servoC.encoder.isMoving)) //JÖHET IDE VALAMI MOTION TIMOUT FÉLE IS
+			{
+				//motionb->sbus.sbusCh[LS].scaledVal.calculationEnabled = 0;
+				servoStop(SERVOA);
+				servoStop(SERVOB);
+				servoStop(SERVOC);
+				OPSEMI_STATE = OPS_WF_RELEASE_SH;
+			}
+		break;
+
+
 
 	} //switch
 }//funct

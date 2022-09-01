@@ -36,6 +36,7 @@ typedef struct Encoderh{
 	int32_t diff_100ms;
 	int32_t preval_100ms;
 	uint8_t count_100ms;
+	uint8_t isMoving;
 
 	int8_t state;		// ha +1 CW; ha -1 CCW; ha 0 nem mozog
 	int8_t reverseEncoderValue;

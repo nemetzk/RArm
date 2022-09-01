@@ -181,6 +181,7 @@ void refreshSbusAnChs(struct sbusth *hsbus)
 				szamlalo 	= (hsbus->sbusCh[i].rawVal.value- hsbus->sbusCh[i].rawVal.min)*( hsbus->sbusCh[i].scaledVal.max - hsbus->sbusCh[i].scaledVal.min);
 				nevezo 		= hsbus->sbusCh[i].rawVal.max - hsbus->sbusCh[i].rawVal.min;
 				hsbus->sbusCh[i].scaledVal.value = (int16_t)(szamlalo/nevezo) + hsbus->sbusCh[i].scaledVal.min;
+				hsbus->sbusCh[i].scaledVal.invValue = hsbus->sbusCh[i].scaledVal.max - hsbus->sbusCh[i].scaledVal.value;
 
 			}
 		}
@@ -195,6 +196,8 @@ void refreshSbusCh(struct sbusChth *sbusCh)
 			szamlalo 	= (sbusCh->rawVal.value - sbusCh->rawVal.min)*( sbusCh->scaledVal.max - sbusCh->scaledVal.min);
 			nevezo 		= sbusCh->rawVal.max - sbusCh->rawVal.min;
 			sbusCh->scaledVal.value = (int16_t)(szamlalo/nevezo) + sbusCh->scaledVal.min;
+			sbusCh->scaledVal.invValue = sbusCh->scaledVal.max -
+					sbusCh->scaledVal.value;
 
 		}
 }

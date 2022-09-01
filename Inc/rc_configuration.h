@@ -26,8 +26,13 @@
 #define SG_C motionb->sbus.sbusCh[SG].digVal.C
 
 #define LS_VAL motionb->sbus.sbusCh[LS].scaledVal.value
+#define LS_VAL_INV motionb->sbus.sbusCh[LS].scaledVal.invValue
+
 #define RS_VAL motionb->sbus.sbusCh[RS].scaledVal.value
+#define RS_VAL_INV motionb->sbus.sbusCh[RS].scaledVal.invValue
+
 #define S2_VAL motionb->sbus.sbusCh[S2].scaledVal.value
+#define S2_VAL_INV motionb->sbus.sbusCh[S2].scaledVal.invValue
 
 #define SBUS_ERROR 			motionb->sbus.sbusHealth.sbusTimeOut
 #define REFRESH_SBUS_AN 	refreshSbusAnChs(&motionb->sbus)
